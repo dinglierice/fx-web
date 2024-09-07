@@ -1,32 +1,15 @@
 package main
 
 import (
-	"context"
+	"database/sql"
+	"fx-web/internal/app"
 	"fx-web/internal/conf"
 	"fx-web/internal/logger"
+	"fx-web/internal/repository"
 	"fx-web/internal/server"
-	"github.com/gin-gonic/gin"
+	"fx-web/internal/service"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
 )
-
-func startApp(lifecycle fx.Lifecycle, r *gin.Engine, config *conf.Config, logger *zap.Logger) {
-	lifecycle.Append(fx.Hook{
-		OnStart: func(context.Context) error {
-			// 单独启动一个协程提供服务器
-			go func() {
-				err := r.Run(config.HttpPort)
-				if err != nil {
-					logger.Error("start server failed", zap.Error(err))
-				}
-			}()
-			return nil
-		},
-		OnStop: func(context.Context) error {
-			return nil
-		},
-	})
-}
 
 func main() {
 	fx.New(
@@ -35,8 +18,16 @@ func main() {
 			server.ProvideGinEngine,
 			conf.ProvideDevConfig,
 			logger.ProvideLogger,
+			repository.NewUserRepository,
+			service.NewUserService,
+			provideDatabaseConnection,
 		),
 		fx.Invoke(
-			startApp,
+			app.StartApp,
 		)).Run()
+}
+
+func provideDatabaseConnection(cfg *conf.Config) (*sql.DB, error) {
+	// 实现数据库连接逻辑
+	return nil, nil
 }
