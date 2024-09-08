@@ -1,8 +1,7 @@
-package initializer
+package db
 
 import (
 	"context"
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"fmt"
 	"fx-web/internal/conf"
@@ -11,14 +10,13 @@ import (
 	"time"
 )
 
-// Init TODO 这里还要记得开启ent的debug模式
-func Init(logger *zap.Logger) func(*conf.Config) (*ent.Client, error) {
+func InitEntDbConnection(logger *zap.Logger) func(*conf.Config) (*ent.Client, error) {
 	return func(cfg *conf.Config) (*ent.Client, error) {
 		logger.Info("Initializing database connection")
 
 		driverName := cfg.DB.Driver
-		dataSourceName := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-			cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.Name)
+		dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=True",
+			cfg.DB.User, cfg.DB.Password, cfg.DB.Host, cfg.DB.Port, cfg.DB.Name)
 
 		drv, err := sql.Open(driverName, dataSourceName)
 		if err != nil {
@@ -31,20 +29,17 @@ func Init(logger *zap.Logger) func(*conf.Config) (*ent.Client, error) {
 		db.SetMaxOpenConns(cfg.DB.MaxOpenConns)
 		db.SetConnMaxLifetime(time.Duration(cfg.DB.ConnMaxLifetime) * time.Second)
 
-		client := ent.NewClient(ent.Driver(drv))
+		var client *ent.Client
+		if cfg.Environment == "development" {
+			client = ent.NewClient(ent.Driver(drv)).Debug()
+		}
+		client = ent.NewClient(ent.Driver(drv))
 
 		if cfg.DB.AutoMigrate {
-			if err := client.Schema.Create(context.Background()); err != nil {
+			if err = client.Schema.Create(context.Background()); err != nil {
 				logger.Error("Failed to create schema resources", zap.Error(err))
 				return nil, fmt.Errorf("failed to create schema resources: %w", err)
 			}
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if err := client.Debug().Schema.Diff(ctx, dialect.MySQL); err != nil {
-			logger.Error("Failed to verify database schema", zap.Error(err))
-			return nil, fmt.Errorf("failed to verify database schema: %w", err)
 		}
 
 		logger.Info("Database connection and schema verification completed successfully")

@@ -20,10 +20,24 @@ type DBConfig struct {
 	AutoMigrate     bool
 }
 
+// ProvideDevConfig 开发环境配置
 func ProvideDevConfig() *Config {
+	dbConfig := DBConfig{
+		Driver:          "mysql",
+		Host:            "127.0.0.1",
+		Port:            3306,
+		User:            "root",
+		Password:        "123456",
+		Name:            "mall_db",
+		MaxIdleConns:    10,
+		MaxOpenConns:    100,
+		ConnMaxLifetime: 10,
+		AutoMigrate:     true,
+	}
 	return &Config{
-		HttpPort:    ":8080",
+		HttpPort:    ":4000",
 		Environment: "development",
 		LogLevel:    "debug",
+		DB:          dbConfig,
 	}
 }

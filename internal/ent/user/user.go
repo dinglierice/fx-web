@@ -76,7 +76,7 @@ var (
 	// MoneyValidator is a validator for the "money" field. It is called by the builders before save.
 	MoneyValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(uint64) error
+	IDValidator func(int) error
 )
 
 // OrderOption defines the ordering options for the User queries.

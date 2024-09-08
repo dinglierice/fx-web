@@ -44,5 +44,5 @@ func init() {
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
 	// user.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	user.IDValidator = userDescID.Validators[0].(func(uint64) error)
+	user.IDValidator = userDescID.Validators[0].(func(int) error)
 }

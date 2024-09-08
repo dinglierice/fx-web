@@ -153,8 +153,8 @@ func (uc *UserCreate) SetNillableMoney(s *string) *UserCreate {
 }
 
 // SetID sets the "id" field.
-func (uc *UserCreate) SetID(u uint64) *UserCreate {
-	uc.mutation.SetID(u)
+func (uc *UserCreate) SetID(i int) *UserCreate {
+	uc.mutation.SetID(i)
 	return uc
 }
 
@@ -251,7 +251,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	}
 	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
-		_node.ID = uint64(id)
+		_node.ID = int(id)
 	}
 	uc.mutation.id = &_node.ID
 	uc.mutation.done = true
@@ -261,7 +261,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
 		_node = &User{config: uc.config}
-		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint64))
+		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	)
 	if id, ok := uc.mutation.ID(); ok {
 		_node.ID = id
@@ -356,7 +356,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint64(id)
+					nodes[i].ID = int(id)
 				}
 				mutation.done = true
 				return nodes[i], nil

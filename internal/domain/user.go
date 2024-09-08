@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"fx-web/internal/ent"
 )
 
 type User struct {
@@ -16,15 +17,15 @@ type User struct {
 }
 
 type UserRepository interface {
-	GetByID(ctx context.Context, id string) (*User, error)
-	Create(ctx context.Context, user *User) error
-	Update(ctx context.Context, user *User) error
+	GetByID(ctx context.Context, id int) (*ent.User, error)
+	Create(ctx context.Context, user *ent.User) error
+	Update(ctx context.Context, user *ent.User) error
 	Delete(ctx context.Context, id string) error
 	// 可以根据需求添加其他方法
 }
 
 type UserService interface {
-	GetUser(ctx context.Context, id string) (*User, error)
+	GetUser(ctx context.Context, id int) (*User, error)
 	CreateUser(ctx context.Context, user *User) error
 	UpdateUser(ctx context.Context, user *User) error
 	DeleteUser(ctx context.Context, id string) error

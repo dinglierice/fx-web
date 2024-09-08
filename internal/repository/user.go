@@ -2,30 +2,30 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 	"fx-web/internal/domain"
+	"fx-web/internal/ent"
 )
 
 // TODO 待实现
 type userRepository struct {
-	db *sql.DB
+	db *ent.Client
 }
 
-func NewUserRepository(db *sql.DB) domain.UserRepository {
+func NewUserRepository(db *ent.Client) domain.UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) GetByID(ctx context.Context, id string) (*domain.User, error) {
+func (r *userRepository) GetByID(ctx context.Context, id int) (*ent.User, error) {
 	// 实现从数据库获取用户的逻辑
-	return nil, nil
+	return r.db.User.Get(ctx, id)
 }
 
-func (r *userRepository) Create(ctx context.Context, user *domain.User) error {
+func (r *userRepository) Create(ctx context.Context, user *ent.User) error {
 	// 实现创建用户的逻辑
 	return nil
 }
 
-func (r *userRepository) Update(ctx context.Context, user *domain.User) error {
+func (r *userRepository) Update(ctx context.Context, user *ent.User) error {
 	// 实现更新用户的逻辑
 	return nil
 }

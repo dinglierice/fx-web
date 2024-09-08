@@ -12,7 +12,7 @@ type User struct {
 // Fields TODO 部分字段Mixin化
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint64("id").
+		field.Int("id").
 			StorageKey("id").
 			Positive().
 			Immutable().
