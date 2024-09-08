@@ -3,16 +3,27 @@ package handler
 import (
 	"fx-web/internal/domain"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
-func UserLogin(c *gin.Context) {
+type UserHandler struct {
+	service domain.UserService
+}
+
+func NewUserHandler(service domain.UserService) *UserHandler {
+	return &UserHandler{service: service}
+}
+
+func (u *UserHandler) UserLogin(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "login",
 	})
 }
 
-func UserQueryTest(c *gin.Context, userId int, service domain.UserService) {
-	user, err := service.GetUser(c, userId)
+func (u *UserHandler) UserQueryTest(c *gin.Context) {
+	idString := c.Param("id")
+	pId, _ := strconv.Atoi(idString)
+	user, err := u.service.GetUser(c, pId)
 	if err != nil {
 		return
 	}

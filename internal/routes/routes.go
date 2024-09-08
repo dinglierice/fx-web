@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"fx-web/internal/routes/apis"
+	"fx-web/internal/routes/handler"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,15 +10,19 @@ type Routes interface {
 }
 
 type GinRoutes struct {
+	userHandler *handler.UserHandler
 }
 
 func (ginRoutes *GinRoutes) SetupRoutes(r *gin.Engine) {
 	// 健康检查路由
-	apis.RegisterHealthRoutes(r)
+	r.GET("/health", handler.HealthCheck)
 	// 用户路由
-	apis.RegisterUserRoutes(r)
+	r.POST("/user/login", ginRoutes.userHandler.UserLogin)
+	r.GET("/user/queryTest/:id", ginRoutes.userHandler.UserQueryTest)
 }
 
-func ProvideRoutes() Routes {
-	return &GinRoutes{}
+func ProvideRoutes(userHandler *handler.UserHandler) Routes {
+	return &GinRoutes{
+		userHandler: userHandler,
+	}
 }

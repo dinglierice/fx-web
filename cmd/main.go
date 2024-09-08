@@ -7,6 +7,7 @@ import (
 	"fx-web/internal/logger"
 	"fx-web/internal/repository"
 	"fx-web/internal/routes"
+	"fx-web/internal/routes/handler"
 	"fx-web/internal/server"
 	"fx-web/internal/service"
 	"go.uber.org/fx"
@@ -19,8 +20,10 @@ func main() {
 			server.ProvideGinEngine,
 			conf.ProvideDevConfig,
 			logger.ProvideLogger,
+			// 用户MVC
 			repository.NewUserRepository,
 			service.NewUserService,
+			handler.NewUserHandler,
 			db.InitEntDbConnection,
 			routes.ProvideRoutes,
 		),
