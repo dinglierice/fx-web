@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fx-web/internal/app"
 	"fx-web/internal/conf"
+	"fx-web/internal/initializer"
 	"fx-web/internal/logger"
 	"fx-web/internal/repository"
 	"fx-web/internal/server"
@@ -20,7 +21,10 @@ func main() {
 			logger.ProvideLogger,
 			repository.NewUserRepository,
 			service.NewUserService,
+
 			provideDatabaseConnection,
+
+			initializer.NewInitializer,
 		),
 		fx.Invoke(
 			app.StartApp,
