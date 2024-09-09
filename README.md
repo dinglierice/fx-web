@@ -1,6 +1,7 @@
 # Fx-web
 
-一个用golang实现的web应用demo，fx、gin、ent、zap
+一个用golang实现的web应用demo.
+使用fx、gin、ent、zap
 
 # Instructions
 ## 1、ent部分初始化
