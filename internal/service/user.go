@@ -13,7 +13,7 @@ func NewUserService(repo domain.UserRepository) domain.UserService {
 	return &userService{repo: repo}
 }
 
-func (s *userService) GetUser(ctx context.Context, id int) (*domain.User, error) {
+func (s *userService) GetUser(ctx context.Context, id uint64) (*domain.User, error) {
 	byID, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err

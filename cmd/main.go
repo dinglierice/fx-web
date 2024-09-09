@@ -20,11 +20,11 @@ func main() {
 			server.ProvideGinEngine,
 			conf.ProvideDevConfig,
 			logger.ProvideLogger,
+			db.InitEntDbConnection,
 			// 用户MVC
 			repository.NewUserRepository,
 			service.NewUserService,
 			handler.NewUserHandler,
-			db.InitEntDbConnection,
 			routes.ProvideRoutes,
 		),
 		fx.Invoke(

@@ -32,7 +32,7 @@ const (
 	// FieldMoney holds the string denoting the money field in the database.
 	FieldMoney = "money"
 	// Table holds the table name of the user in the database.
-	Table = "users"
+	Table = "user"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -76,7 +76,7 @@ var (
 	// MoneyValidator is a validator for the "money" field. It is called by the builders before save.
 	MoneyValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(int) error
+	IDValidator func(uint64) error
 )
 
 // OrderOption defines the ordering options for the User queries.

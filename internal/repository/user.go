@@ -15,7 +15,7 @@ func NewUserRepository(db *ent.Client) domain.UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) GetByID(ctx context.Context, id int) (*ent.User, error) {
+func (r *userRepository) GetByID(ctx context.Context, id uint64) (*ent.User, error) {
 	// 实现从数据库获取用户的逻辑
 	return r.db.User.Get(ctx, id)
 }

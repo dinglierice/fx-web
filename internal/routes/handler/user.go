@@ -22,7 +22,7 @@ func (u *UserHandler) UserLogin(c *gin.Context) {
 
 func (u *UserHandler) UserQueryTest(c *gin.Context) {
 	idString := c.Param("id")
-	pId, _ := strconv.Atoi(idString)
+	pId, _ := strconv.ParseUint(idString, 10, 64)
 	user, err := u.service.GetUser(c, pId)
 	if err != nil {
 		return

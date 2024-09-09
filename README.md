@@ -10,4 +10,12 @@ go run entgo.io/ent/cmd/ent init User
 
 // 修改对应的ent schema文件
 go run entgo.io/ent/cmd/ent generate ./ent/schema
+
+// 修挂表明
+func (User) Annotations() []schema.Annotation {
+    return []schema.Annotation{
+    entsql.Annotation{Table: "user"},
+    }
+}
 ```
+

@@ -2,6 +2,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 )
 
@@ -9,10 +11,16 @@ type User struct {
 	ent.Schema
 }
 
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "user"},
+	}
+}
+
 // Fields TODO 部分字段Mixin化
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").
+		field.Uint64("id").
 			StorageKey("id").
 			Positive().
 			Immutable().

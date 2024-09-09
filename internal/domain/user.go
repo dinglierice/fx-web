@@ -17,7 +17,7 @@ type User struct {
 }
 
 type UserRepository interface {
-	GetByID(ctx context.Context, id int) (*ent.User, error)
+	GetByID(ctx context.Context, id uint64) (*ent.User, error)
 	Create(ctx context.Context, user *ent.User) error
 	Update(ctx context.Context, user *ent.User) error
 	Delete(ctx context.Context, id string) error
@@ -25,7 +25,7 @@ type UserRepository interface {
 }
 
 type UserService interface {
-	GetUser(ctx context.Context, id int) (*User, error)
+	GetUser(ctx context.Context, id uint64) (*User, error)
 	CreateUser(ctx context.Context, user *User) error
 	UpdateUser(ctx context.Context, user *User) error
 	DeleteUser(ctx context.Context, id string) error
