@@ -5,6 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 接口:Routes, 提供设置路由的SetupRoutes方法
+// 实现:GinRoutes, 提供SetupRoutes方法的具体实现
+// 注入:handler.UserHandler
+// ProvideRoutes: 提供注入构造的方法
+
 type Routes interface {
 	SetupRoutes(r *gin.Engine)
 }
