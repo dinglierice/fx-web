@@ -42,3 +42,8 @@ func (s *userService) UpdateUser(ctx context.Context, user *domain.User) error {
 func (s *userService) DeleteUser(ctx context.Context, id string) error {
 	return nil
 }
+
+func (s *userService) Login(ctx context.Context, user *domain.User) error {
+	// TODO 看似无需新增repo接口, 复现下参数校验逻辑即可
+	return nil
+}

@@ -29,5 +29,5 @@ type UserService interface {
 	CreateUser(ctx context.Context, user *User) error
 	UpdateUser(ctx context.Context, user *User) error
 	DeleteUser(ctx context.Context, id string) error
-	// 可以根据业务需求添加其他方法
+	Login(ctx context.Context, user *User) error
 }
