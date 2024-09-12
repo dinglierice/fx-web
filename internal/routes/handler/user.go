@@ -17,14 +17,13 @@ func NewUserHandler(service domain.UserService) *UserHandler {
 }
 
 func (u *UserHandler) UserLogin(c *gin.Context) {
-	// TODO 这里看下是指针还是结构体
-	var user domain.User
-	if err := c.ShouldBind(&user); err == nil {
-		res := u.service.Login(c.Request.Context(), &user)
+	user := &domain.User{}
+	if err := c.ShouldBind(user); err == nil {
+		res := u.service.Login(c.Request.Context(), user)
 		c.JSON(200, res)
 	} else {
 		u.logger.Info("UserLogin", zap.Error(err))
-		c.JSON(500, nil)
+		c.JSON(400, nil)
 	}
 }
 
