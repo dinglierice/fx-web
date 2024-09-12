@@ -3,6 +3,8 @@
 package user
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -32,7 +34,7 @@ const (
 	// FieldMoney holds the string denoting the money field in the database.
 	FieldMoney = "money"
 	// Table holds the table name of the user in the database.
-	Table = "user"
+	Table = "users"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -61,6 +63,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// UserNameValidator is a validator for the "user_name" field. It is called by the builders before save.
 	UserNameValidator func(string) error
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.

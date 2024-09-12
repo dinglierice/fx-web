@@ -25,6 +25,11 @@ func main() {
 			repository.NewUserRepository,
 			service.NewUserService,
 			handler.NewUserHandler,
+			// 配置MVN
+			repository.NewPsConfigRepository,
+			service.NewPsConfigService,
+			handler.NewPsConfigHandler,
+			// 注入路由
 			routes.ProvideRoutes,
 		),
 		fx.Invoke(

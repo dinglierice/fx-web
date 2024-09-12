@@ -1,7 +1,6 @@
 package db
 
 import (
-	"context"
 	"entgo.io/ent/dialect/sql"
 	"fmt"
 	"fx-web/internal/conf"
@@ -34,13 +33,6 @@ func InitEntDbConnection(logger *zap.Logger, cfg *conf.Config) (*ent.Client, err
 		client = ent.NewClient(ent.Driver(drv)).Debug()
 	} else {
 		client = ent.NewClient(ent.Driver(drv))
-	}
-
-	if cfg.DB.AutoMigrate {
-		if err = client.Schema.Create(context.Background()); err != nil {
-			logger.Error("Failed to create schema resources", zap.Error(err))
-			return nil, fmt.Errorf("failed to create schema resources: %w", err)
-		}
 	}
 
 	logger.Info("Database connection and schema verification completed successfully")

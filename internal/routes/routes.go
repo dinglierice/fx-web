@@ -15,7 +15,8 @@ type Routes interface {
 }
 
 type GinRoutes struct {
-	userHandler *handler.UserHandler
+	userHandler   *handler.UserHandler
+	configHandler *handler.ConfigHandler
 }
 
 func (ginRoutes *GinRoutes) SetupRoutes(r *gin.Engine) {
@@ -24,10 +25,14 @@ func (ginRoutes *GinRoutes) SetupRoutes(r *gin.Engine) {
 	// 用户路由
 	r.POST("/user/login", ginRoutes.userHandler.UserLogin)
 	r.GET("/user/queryTest/:id", ginRoutes.userHandler.UserQueryTest)
+
+	// 策略路由
+	r.GET("/configs/list", ginRoutes.configHandler.List)
 }
 
-func ProvideRoutes(userHandler *handler.UserHandler) Routes {
+func ProvideRoutes(userHandler *handler.UserHandler, configHandler *handler.ConfigHandler) Routes {
 	return &GinRoutes{
-		userHandler: userHandler,
+		userHandler:   userHandler,
+		configHandler: configHandler,
 	}
 }

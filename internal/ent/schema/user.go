@@ -13,11 +13,10 @@ type User struct {
 
 func (User) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "user"},
+		entsql.Annotation{Table: "users"},
 	}
 }
 
-// Fields TODO 部分字段Mixin化
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint64("id").
@@ -25,12 +24,6 @@ func (User) Fields() []ent.Field {
 			Positive().
 			Immutable().
 			StructTag(`json:"id,omitempty"`),
-		field.Time("created_at").
-			Optional().
-			Nillable(),
-		field.Time("updated_at").
-			Optional().
-			Nillable(),
 		field.Time("deleted_at").
 			Optional().
 			Nillable(),
@@ -61,4 +54,10 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return nil
+}
+
+func (User) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		TimeMixin{},
+	}
 }

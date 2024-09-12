@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"fx-web/internal/ent/predicate"
+	"fx-web/internal/ent/psconfig"
+	"fx-web/internal/ent/psstrategy"
 	"fx-web/internal/ent/user"
 	"sync"
 	"time"
@@ -24,8 +26,1908 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeUser = "User"
+	TypePsConfig   = "PsConfig"
+	TypePsStrategy = "PsStrategy"
+	TypeUser       = "User"
 )
+
+// PsConfigMutation represents an operation that mutates the PsConfig nodes in the graph.
+type PsConfigMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uint64
+	created_at      *time.Time
+	updated_at      *time.Time
+	ps_scene        *string
+	ps_filter       *uint64
+	addps_filter    *int64
+	ps_message      *uint64
+	addps_message   *int64
+	ps_event        *uint64
+	addps_event     *int64
+	ps_feature      *uint64
+	addps_feature   *int64
+	owner_id        *uint64
+	addowner_id     *int64
+	managers        *string
+	update_user     *uint64
+	addupdate_user  *int64
+	clearedFields   map[string]struct{}
+	strategy        *uint64
+	clearedstrategy bool
+	done            bool
+	oldValue        func(context.Context) (*PsConfig, error)
+	predicates      []predicate.PsConfig
+}
+
+var _ ent.Mutation = (*PsConfigMutation)(nil)
+
+// psconfigOption allows management of the mutation configuration using functional options.
+type psconfigOption func(*PsConfigMutation)
+
+// newPsConfigMutation creates new mutation for the PsConfig entity.
+func newPsConfigMutation(c config, op Op, opts ...psconfigOption) *PsConfigMutation {
+	m := &PsConfigMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePsConfig,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPsConfigID sets the ID field of the mutation.
+func withPsConfigID(id uint64) psconfigOption {
+	return func(m *PsConfigMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PsConfig
+		)
+		m.oldValue = func(ctx context.Context) (*PsConfig, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PsConfig.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPsConfig sets the old PsConfig of the mutation.
+func withPsConfig(node *PsConfig) psconfigOption {
+	return func(m *PsConfigMutation) {
+		m.oldValue = func(context.Context) (*PsConfig, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PsConfigMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PsConfigMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PsConfig entities.
+func (m *PsConfigMutation) SetID(id uint64) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PsConfigMutation) ID() (id uint64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PsConfigMutation) IDs(ctx context.Context) ([]uint64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uint64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PsConfig.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *PsConfigMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *PsConfigMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the PsConfig entity.
+// If the PsConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsConfigMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *PsConfigMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *PsConfigMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *PsConfigMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the PsConfig entity.
+// If the PsConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsConfigMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *PsConfigMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetPsScene sets the "ps_scene" field.
+func (m *PsConfigMutation) SetPsScene(s string) {
+	m.ps_scene = &s
+}
+
+// PsScene returns the value of the "ps_scene" field in the mutation.
+func (m *PsConfigMutation) PsScene() (r string, exists bool) {
+	v := m.ps_scene
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPsScene returns the old "ps_scene" field's value of the PsConfig entity.
+// If the PsConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsConfigMutation) OldPsScene(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPsScene is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPsScene requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPsScene: %w", err)
+	}
+	return oldValue.PsScene, nil
+}
+
+// ResetPsScene resets all changes to the "ps_scene" field.
+func (m *PsConfigMutation) ResetPsScene() {
+	m.ps_scene = nil
+}
+
+// SetPsFilter sets the "ps_filter" field.
+func (m *PsConfigMutation) SetPsFilter(u uint64) {
+	m.ps_filter = &u
+	m.addps_filter = nil
+}
+
+// PsFilter returns the value of the "ps_filter" field in the mutation.
+func (m *PsConfigMutation) PsFilter() (r uint64, exists bool) {
+	v := m.ps_filter
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPsFilter returns the old "ps_filter" field's value of the PsConfig entity.
+// If the PsConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsConfigMutation) OldPsFilter(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPsFilter is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPsFilter requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPsFilter: %w", err)
+	}
+	return oldValue.PsFilter, nil
+}
+
+// AddPsFilter adds u to the "ps_filter" field.
+func (m *PsConfigMutation) AddPsFilter(u int64) {
+	if m.addps_filter != nil {
+		*m.addps_filter += u
+	} else {
+		m.addps_filter = &u
+	}
+}
+
+// AddedPsFilter returns the value that was added to the "ps_filter" field in this mutation.
+func (m *PsConfigMutation) AddedPsFilter() (r int64, exists bool) {
+	v := m.addps_filter
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPsFilter resets all changes to the "ps_filter" field.
+func (m *PsConfigMutation) ResetPsFilter() {
+	m.ps_filter = nil
+	m.addps_filter = nil
+}
+
+// SetPsMessage sets the "ps_message" field.
+func (m *PsConfigMutation) SetPsMessage(u uint64) {
+	m.ps_message = &u
+	m.addps_message = nil
+}
+
+// PsMessage returns the value of the "ps_message" field in the mutation.
+func (m *PsConfigMutation) PsMessage() (r uint64, exists bool) {
+	v := m.ps_message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPsMessage returns the old "ps_message" field's value of the PsConfig entity.
+// If the PsConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsConfigMutation) OldPsMessage(ctx context.Context) (v *uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPsMessage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPsMessage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPsMessage: %w", err)
+	}
+	return oldValue.PsMessage, nil
+}
+
+// AddPsMessage adds u to the "ps_message" field.
+func (m *PsConfigMutation) AddPsMessage(u int64) {
+	if m.addps_message != nil {
+		*m.addps_message += u
+	} else {
+		m.addps_message = &u
+	}
+}
+
+// AddedPsMessage returns the value that was added to the "ps_message" field in this mutation.
+func (m *PsConfigMutation) AddedPsMessage() (r int64, exists bool) {
+	v := m.addps_message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPsMessage clears the value of the "ps_message" field.
+func (m *PsConfigMutation) ClearPsMessage() {
+	m.ps_message = nil
+	m.addps_message = nil
+	m.clearedFields[psconfig.FieldPsMessage] = struct{}{}
+}
+
+// PsMessageCleared returns if the "ps_message" field was cleared in this mutation.
+func (m *PsConfigMutation) PsMessageCleared() bool {
+	_, ok := m.clearedFields[psconfig.FieldPsMessage]
+	return ok
+}
+
+// ResetPsMessage resets all changes to the "ps_message" field.
+func (m *PsConfigMutation) ResetPsMessage() {
+	m.ps_message = nil
+	m.addps_message = nil
+	delete(m.clearedFields, psconfig.FieldPsMessage)
+}
+
+// SetPsEvent sets the "ps_event" field.
+func (m *PsConfigMutation) SetPsEvent(u uint64) {
+	m.ps_event = &u
+	m.addps_event = nil
+}
+
+// PsEvent returns the value of the "ps_event" field in the mutation.
+func (m *PsConfigMutation) PsEvent() (r uint64, exists bool) {
+	v := m.ps_event
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPsEvent returns the old "ps_event" field's value of the PsConfig entity.
+// If the PsConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsConfigMutation) OldPsEvent(ctx context.Context) (v *uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPsEvent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPsEvent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPsEvent: %w", err)
+	}
+	return oldValue.PsEvent, nil
+}
+
+// AddPsEvent adds u to the "ps_event" field.
+func (m *PsConfigMutation) AddPsEvent(u int64) {
+	if m.addps_event != nil {
+		*m.addps_event += u
+	} else {
+		m.addps_event = &u
+	}
+}
+
+// AddedPsEvent returns the value that was added to the "ps_event" field in this mutation.
+func (m *PsConfigMutation) AddedPsEvent() (r int64, exists bool) {
+	v := m.addps_event
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPsEvent clears the value of the "ps_event" field.
+func (m *PsConfigMutation) ClearPsEvent() {
+	m.ps_event = nil
+	m.addps_event = nil
+	m.clearedFields[psconfig.FieldPsEvent] = struct{}{}
+}
+
+// PsEventCleared returns if the "ps_event" field was cleared in this mutation.
+func (m *PsConfigMutation) PsEventCleared() bool {
+	_, ok := m.clearedFields[psconfig.FieldPsEvent]
+	return ok
+}
+
+// ResetPsEvent resets all changes to the "ps_event" field.
+func (m *PsConfigMutation) ResetPsEvent() {
+	m.ps_event = nil
+	m.addps_event = nil
+	delete(m.clearedFields, psconfig.FieldPsEvent)
+}
+
+// SetPsFeature sets the "ps_feature" field.
+func (m *PsConfigMutation) SetPsFeature(u uint64) {
+	m.ps_feature = &u
+	m.addps_feature = nil
+}
+
+// PsFeature returns the value of the "ps_feature" field in the mutation.
+func (m *PsConfigMutation) PsFeature() (r uint64, exists bool) {
+	v := m.ps_feature
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPsFeature returns the old "ps_feature" field's value of the PsConfig entity.
+// If the PsConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsConfigMutation) OldPsFeature(ctx context.Context) (v *uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPsFeature is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPsFeature requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPsFeature: %w", err)
+	}
+	return oldValue.PsFeature, nil
+}
+
+// AddPsFeature adds u to the "ps_feature" field.
+func (m *PsConfigMutation) AddPsFeature(u int64) {
+	if m.addps_feature != nil {
+		*m.addps_feature += u
+	} else {
+		m.addps_feature = &u
+	}
+}
+
+// AddedPsFeature returns the value that was added to the "ps_feature" field in this mutation.
+func (m *PsConfigMutation) AddedPsFeature() (r int64, exists bool) {
+	v := m.addps_feature
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPsFeature clears the value of the "ps_feature" field.
+func (m *PsConfigMutation) ClearPsFeature() {
+	m.ps_feature = nil
+	m.addps_feature = nil
+	m.clearedFields[psconfig.FieldPsFeature] = struct{}{}
+}
+
+// PsFeatureCleared returns if the "ps_feature" field was cleared in this mutation.
+func (m *PsConfigMutation) PsFeatureCleared() bool {
+	_, ok := m.clearedFields[psconfig.FieldPsFeature]
+	return ok
+}
+
+// ResetPsFeature resets all changes to the "ps_feature" field.
+func (m *PsConfigMutation) ResetPsFeature() {
+	m.ps_feature = nil
+	m.addps_feature = nil
+	delete(m.clearedFields, psconfig.FieldPsFeature)
+}
+
+// SetPsStrategy sets the "ps_strategy" field.
+func (m *PsConfigMutation) SetPsStrategy(u uint64) {
+	m.strategy = &u
+}
+
+// PsStrategy returns the value of the "ps_strategy" field in the mutation.
+func (m *PsConfigMutation) PsStrategy() (r uint64, exists bool) {
+	v := m.strategy
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPsStrategy returns the old "ps_strategy" field's value of the PsConfig entity.
+// If the PsConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsConfigMutation) OldPsStrategy(ctx context.Context) (v *uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPsStrategy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPsStrategy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPsStrategy: %w", err)
+	}
+	return oldValue.PsStrategy, nil
+}
+
+// ClearPsStrategy clears the value of the "ps_strategy" field.
+func (m *PsConfigMutation) ClearPsStrategy() {
+	m.strategy = nil
+	m.clearedFields[psconfig.FieldPsStrategy] = struct{}{}
+}
+
+// PsStrategyCleared returns if the "ps_strategy" field was cleared in this mutation.
+func (m *PsConfigMutation) PsStrategyCleared() bool {
+	_, ok := m.clearedFields[psconfig.FieldPsStrategy]
+	return ok
+}
+
+// ResetPsStrategy resets all changes to the "ps_strategy" field.
+func (m *PsConfigMutation) ResetPsStrategy() {
+	m.strategy = nil
+	delete(m.clearedFields, psconfig.FieldPsStrategy)
+}
+
+// SetOwnerID sets the "owner_id" field.
+func (m *PsConfigMutation) SetOwnerID(u uint64) {
+	m.owner_id = &u
+	m.addowner_id = nil
+}
+
+// OwnerID returns the value of the "owner_id" field in the mutation.
+func (m *PsConfigMutation) OwnerID() (r uint64, exists bool) {
+	v := m.owner_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwnerID returns the old "owner_id" field's value of the PsConfig entity.
+// If the PsConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsConfigMutation) OldOwnerID(ctx context.Context) (v *uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwnerID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwnerID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwnerID: %w", err)
+	}
+	return oldValue.OwnerID, nil
+}
+
+// AddOwnerID adds u to the "owner_id" field.
+func (m *PsConfigMutation) AddOwnerID(u int64) {
+	if m.addowner_id != nil {
+		*m.addowner_id += u
+	} else {
+		m.addowner_id = &u
+	}
+}
+
+// AddedOwnerID returns the value that was added to the "owner_id" field in this mutation.
+func (m *PsConfigMutation) AddedOwnerID() (r int64, exists bool) {
+	v := m.addowner_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearOwnerID clears the value of the "owner_id" field.
+func (m *PsConfigMutation) ClearOwnerID() {
+	m.owner_id = nil
+	m.addowner_id = nil
+	m.clearedFields[psconfig.FieldOwnerID] = struct{}{}
+}
+
+// OwnerIDCleared returns if the "owner_id" field was cleared in this mutation.
+func (m *PsConfigMutation) OwnerIDCleared() bool {
+	_, ok := m.clearedFields[psconfig.FieldOwnerID]
+	return ok
+}
+
+// ResetOwnerID resets all changes to the "owner_id" field.
+func (m *PsConfigMutation) ResetOwnerID() {
+	m.owner_id = nil
+	m.addowner_id = nil
+	delete(m.clearedFields, psconfig.FieldOwnerID)
+}
+
+// SetManagers sets the "managers" field.
+func (m *PsConfigMutation) SetManagers(s string) {
+	m.managers = &s
+}
+
+// Managers returns the value of the "managers" field in the mutation.
+func (m *PsConfigMutation) Managers() (r string, exists bool) {
+	v := m.managers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldManagers returns the old "managers" field's value of the PsConfig entity.
+// If the PsConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsConfigMutation) OldManagers(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldManagers is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldManagers requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldManagers: %w", err)
+	}
+	return oldValue.Managers, nil
+}
+
+// ClearManagers clears the value of the "managers" field.
+func (m *PsConfigMutation) ClearManagers() {
+	m.managers = nil
+	m.clearedFields[psconfig.FieldManagers] = struct{}{}
+}
+
+// ManagersCleared returns if the "managers" field was cleared in this mutation.
+func (m *PsConfigMutation) ManagersCleared() bool {
+	_, ok := m.clearedFields[psconfig.FieldManagers]
+	return ok
+}
+
+// ResetManagers resets all changes to the "managers" field.
+func (m *PsConfigMutation) ResetManagers() {
+	m.managers = nil
+	delete(m.clearedFields, psconfig.FieldManagers)
+}
+
+// SetUpdateUser sets the "update_user" field.
+func (m *PsConfigMutation) SetUpdateUser(u uint64) {
+	m.update_user = &u
+	m.addupdate_user = nil
+}
+
+// UpdateUser returns the value of the "update_user" field in the mutation.
+func (m *PsConfigMutation) UpdateUser() (r uint64, exists bool) {
+	v := m.update_user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateUser returns the old "update_user" field's value of the PsConfig entity.
+// If the PsConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsConfigMutation) OldUpdateUser(ctx context.Context) (v *uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdateUser is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdateUser requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateUser: %w", err)
+	}
+	return oldValue.UpdateUser, nil
+}
+
+// AddUpdateUser adds u to the "update_user" field.
+func (m *PsConfigMutation) AddUpdateUser(u int64) {
+	if m.addupdate_user != nil {
+		*m.addupdate_user += u
+	} else {
+		m.addupdate_user = &u
+	}
+}
+
+// AddedUpdateUser returns the value that was added to the "update_user" field in this mutation.
+func (m *PsConfigMutation) AddedUpdateUser() (r int64, exists bool) {
+	v := m.addupdate_user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearUpdateUser clears the value of the "update_user" field.
+func (m *PsConfigMutation) ClearUpdateUser() {
+	m.update_user = nil
+	m.addupdate_user = nil
+	m.clearedFields[psconfig.FieldUpdateUser] = struct{}{}
+}
+
+// UpdateUserCleared returns if the "update_user" field was cleared in this mutation.
+func (m *PsConfigMutation) UpdateUserCleared() bool {
+	_, ok := m.clearedFields[psconfig.FieldUpdateUser]
+	return ok
+}
+
+// ResetUpdateUser resets all changes to the "update_user" field.
+func (m *PsConfigMutation) ResetUpdateUser() {
+	m.update_user = nil
+	m.addupdate_user = nil
+	delete(m.clearedFields, psconfig.FieldUpdateUser)
+}
+
+// SetStrategyID sets the "strategy" edge to the PsStrategy entity by id.
+func (m *PsConfigMutation) SetStrategyID(id uint64) {
+	m.strategy = &id
+}
+
+// ClearStrategy clears the "strategy" edge to the PsStrategy entity.
+func (m *PsConfigMutation) ClearStrategy() {
+	m.clearedstrategy = true
+	m.clearedFields[psconfig.FieldPsStrategy] = struct{}{}
+}
+
+// StrategyCleared reports if the "strategy" edge to the PsStrategy entity was cleared.
+func (m *PsConfigMutation) StrategyCleared() bool {
+	return m.PsStrategyCleared() || m.clearedstrategy
+}
+
+// StrategyID returns the "strategy" edge ID in the mutation.
+func (m *PsConfigMutation) StrategyID() (id uint64, exists bool) {
+	if m.strategy != nil {
+		return *m.strategy, true
+	}
+	return
+}
+
+// StrategyIDs returns the "strategy" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// StrategyID instead. It exists only for internal usage by the builders.
+func (m *PsConfigMutation) StrategyIDs() (ids []uint64) {
+	if id := m.strategy; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetStrategy resets all changes to the "strategy" edge.
+func (m *PsConfigMutation) ResetStrategy() {
+	m.strategy = nil
+	m.clearedstrategy = false
+}
+
+// Where appends a list predicates to the PsConfigMutation builder.
+func (m *PsConfigMutation) Where(ps ...predicate.PsConfig) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PsConfigMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PsConfigMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PsConfig, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PsConfigMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PsConfigMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PsConfig).
+func (m *PsConfigMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PsConfigMutation) Fields() []string {
+	fields := make([]string, 0, 11)
+	if m.created_at != nil {
+		fields = append(fields, psconfig.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, psconfig.FieldUpdatedAt)
+	}
+	if m.ps_scene != nil {
+		fields = append(fields, psconfig.FieldPsScene)
+	}
+	if m.ps_filter != nil {
+		fields = append(fields, psconfig.FieldPsFilter)
+	}
+	if m.ps_message != nil {
+		fields = append(fields, psconfig.FieldPsMessage)
+	}
+	if m.ps_event != nil {
+		fields = append(fields, psconfig.FieldPsEvent)
+	}
+	if m.ps_feature != nil {
+		fields = append(fields, psconfig.FieldPsFeature)
+	}
+	if m.strategy != nil {
+		fields = append(fields, psconfig.FieldPsStrategy)
+	}
+	if m.owner_id != nil {
+		fields = append(fields, psconfig.FieldOwnerID)
+	}
+	if m.managers != nil {
+		fields = append(fields, psconfig.FieldManagers)
+	}
+	if m.update_user != nil {
+		fields = append(fields, psconfig.FieldUpdateUser)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PsConfigMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case psconfig.FieldCreatedAt:
+		return m.CreatedAt()
+	case psconfig.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case psconfig.FieldPsScene:
+		return m.PsScene()
+	case psconfig.FieldPsFilter:
+		return m.PsFilter()
+	case psconfig.FieldPsMessage:
+		return m.PsMessage()
+	case psconfig.FieldPsEvent:
+		return m.PsEvent()
+	case psconfig.FieldPsFeature:
+		return m.PsFeature()
+	case psconfig.FieldPsStrategy:
+		return m.PsStrategy()
+	case psconfig.FieldOwnerID:
+		return m.OwnerID()
+	case psconfig.FieldManagers:
+		return m.Managers()
+	case psconfig.FieldUpdateUser:
+		return m.UpdateUser()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PsConfigMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case psconfig.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case psconfig.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case psconfig.FieldPsScene:
+		return m.OldPsScene(ctx)
+	case psconfig.FieldPsFilter:
+		return m.OldPsFilter(ctx)
+	case psconfig.FieldPsMessage:
+		return m.OldPsMessage(ctx)
+	case psconfig.FieldPsEvent:
+		return m.OldPsEvent(ctx)
+	case psconfig.FieldPsFeature:
+		return m.OldPsFeature(ctx)
+	case psconfig.FieldPsStrategy:
+		return m.OldPsStrategy(ctx)
+	case psconfig.FieldOwnerID:
+		return m.OldOwnerID(ctx)
+	case psconfig.FieldManagers:
+		return m.OldManagers(ctx)
+	case psconfig.FieldUpdateUser:
+		return m.OldUpdateUser(ctx)
+	}
+	return nil, fmt.Errorf("unknown PsConfig field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PsConfigMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case psconfig.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case psconfig.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case psconfig.FieldPsScene:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPsScene(v)
+		return nil
+	case psconfig.FieldPsFilter:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPsFilter(v)
+		return nil
+	case psconfig.FieldPsMessage:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPsMessage(v)
+		return nil
+	case psconfig.FieldPsEvent:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPsEvent(v)
+		return nil
+	case psconfig.FieldPsFeature:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPsFeature(v)
+		return nil
+	case psconfig.FieldPsStrategy:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPsStrategy(v)
+		return nil
+	case psconfig.FieldOwnerID:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwnerID(v)
+		return nil
+	case psconfig.FieldManagers:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetManagers(v)
+		return nil
+	case psconfig.FieldUpdateUser:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateUser(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PsConfig field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PsConfigMutation) AddedFields() []string {
+	var fields []string
+	if m.addps_filter != nil {
+		fields = append(fields, psconfig.FieldPsFilter)
+	}
+	if m.addps_message != nil {
+		fields = append(fields, psconfig.FieldPsMessage)
+	}
+	if m.addps_event != nil {
+		fields = append(fields, psconfig.FieldPsEvent)
+	}
+	if m.addps_feature != nil {
+		fields = append(fields, psconfig.FieldPsFeature)
+	}
+	if m.addowner_id != nil {
+		fields = append(fields, psconfig.FieldOwnerID)
+	}
+	if m.addupdate_user != nil {
+		fields = append(fields, psconfig.FieldUpdateUser)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PsConfigMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case psconfig.FieldPsFilter:
+		return m.AddedPsFilter()
+	case psconfig.FieldPsMessage:
+		return m.AddedPsMessage()
+	case psconfig.FieldPsEvent:
+		return m.AddedPsEvent()
+	case psconfig.FieldPsFeature:
+		return m.AddedPsFeature()
+	case psconfig.FieldOwnerID:
+		return m.AddedOwnerID()
+	case psconfig.FieldUpdateUser:
+		return m.AddedUpdateUser()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PsConfigMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case psconfig.FieldPsFilter:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPsFilter(v)
+		return nil
+	case psconfig.FieldPsMessage:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPsMessage(v)
+		return nil
+	case psconfig.FieldPsEvent:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPsEvent(v)
+		return nil
+	case psconfig.FieldPsFeature:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPsFeature(v)
+		return nil
+	case psconfig.FieldOwnerID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOwnerID(v)
+		return nil
+	case psconfig.FieldUpdateUser:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUpdateUser(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PsConfig numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PsConfigMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(psconfig.FieldPsMessage) {
+		fields = append(fields, psconfig.FieldPsMessage)
+	}
+	if m.FieldCleared(psconfig.FieldPsEvent) {
+		fields = append(fields, psconfig.FieldPsEvent)
+	}
+	if m.FieldCleared(psconfig.FieldPsFeature) {
+		fields = append(fields, psconfig.FieldPsFeature)
+	}
+	if m.FieldCleared(psconfig.FieldPsStrategy) {
+		fields = append(fields, psconfig.FieldPsStrategy)
+	}
+	if m.FieldCleared(psconfig.FieldOwnerID) {
+		fields = append(fields, psconfig.FieldOwnerID)
+	}
+	if m.FieldCleared(psconfig.FieldManagers) {
+		fields = append(fields, psconfig.FieldManagers)
+	}
+	if m.FieldCleared(psconfig.FieldUpdateUser) {
+		fields = append(fields, psconfig.FieldUpdateUser)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PsConfigMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PsConfigMutation) ClearField(name string) error {
+	switch name {
+	case psconfig.FieldPsMessage:
+		m.ClearPsMessage()
+		return nil
+	case psconfig.FieldPsEvent:
+		m.ClearPsEvent()
+		return nil
+	case psconfig.FieldPsFeature:
+		m.ClearPsFeature()
+		return nil
+	case psconfig.FieldPsStrategy:
+		m.ClearPsStrategy()
+		return nil
+	case psconfig.FieldOwnerID:
+		m.ClearOwnerID()
+		return nil
+	case psconfig.FieldManagers:
+		m.ClearManagers()
+		return nil
+	case psconfig.FieldUpdateUser:
+		m.ClearUpdateUser()
+		return nil
+	}
+	return fmt.Errorf("unknown PsConfig nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PsConfigMutation) ResetField(name string) error {
+	switch name {
+	case psconfig.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case psconfig.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case psconfig.FieldPsScene:
+		m.ResetPsScene()
+		return nil
+	case psconfig.FieldPsFilter:
+		m.ResetPsFilter()
+		return nil
+	case psconfig.FieldPsMessage:
+		m.ResetPsMessage()
+		return nil
+	case psconfig.FieldPsEvent:
+		m.ResetPsEvent()
+		return nil
+	case psconfig.FieldPsFeature:
+		m.ResetPsFeature()
+		return nil
+	case psconfig.FieldPsStrategy:
+		m.ResetPsStrategy()
+		return nil
+	case psconfig.FieldOwnerID:
+		m.ResetOwnerID()
+		return nil
+	case psconfig.FieldManagers:
+		m.ResetManagers()
+		return nil
+	case psconfig.FieldUpdateUser:
+		m.ResetUpdateUser()
+		return nil
+	}
+	return fmt.Errorf("unknown PsConfig field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PsConfigMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.strategy != nil {
+		edges = append(edges, psconfig.EdgeStrategy)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PsConfigMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case psconfig.EdgeStrategy:
+		if id := m.strategy; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PsConfigMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PsConfigMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PsConfigMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedstrategy {
+		edges = append(edges, psconfig.EdgeStrategy)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PsConfigMutation) EdgeCleared(name string) bool {
+	switch name {
+	case psconfig.EdgeStrategy:
+		return m.clearedstrategy
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PsConfigMutation) ClearEdge(name string) error {
+	switch name {
+	case psconfig.EdgeStrategy:
+		m.ClearStrategy()
+		return nil
+	}
+	return fmt.Errorf("unknown PsConfig unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PsConfigMutation) ResetEdge(name string) error {
+	switch name {
+	case psconfig.EdgeStrategy:
+		m.ResetStrategy()
+		return nil
+	}
+	return fmt.Errorf("unknown PsConfig edge %s", name)
+}
+
+// PsStrategyMutation represents an operation that mutates the PsStrategy nodes in the graph.
+type PsStrategyMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *uint64
+	created_at     *time.Time
+	updated_at     *time.Time
+	owner          *uint64
+	addowner       *int64
+	script_content *string
+	is_delete      *int
+	addis_delete   *int
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*PsStrategy, error)
+	predicates     []predicate.PsStrategy
+}
+
+var _ ent.Mutation = (*PsStrategyMutation)(nil)
+
+// psstrategyOption allows management of the mutation configuration using functional options.
+type psstrategyOption func(*PsStrategyMutation)
+
+// newPsStrategyMutation creates new mutation for the PsStrategy entity.
+func newPsStrategyMutation(c config, op Op, opts ...psstrategyOption) *PsStrategyMutation {
+	m := &PsStrategyMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePsStrategy,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPsStrategyID sets the ID field of the mutation.
+func withPsStrategyID(id uint64) psstrategyOption {
+	return func(m *PsStrategyMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PsStrategy
+		)
+		m.oldValue = func(ctx context.Context) (*PsStrategy, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PsStrategy.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPsStrategy sets the old PsStrategy of the mutation.
+func withPsStrategy(node *PsStrategy) psstrategyOption {
+	return func(m *PsStrategyMutation) {
+		m.oldValue = func(context.Context) (*PsStrategy, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PsStrategyMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PsStrategyMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PsStrategy entities.
+func (m *PsStrategyMutation) SetID(id uint64) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PsStrategyMutation) ID() (id uint64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PsStrategyMutation) IDs(ctx context.Context) ([]uint64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uint64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PsStrategy.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *PsStrategyMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *PsStrategyMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the PsStrategy entity.
+// If the PsStrategy object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsStrategyMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *PsStrategyMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *PsStrategyMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *PsStrategyMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the PsStrategy entity.
+// If the PsStrategy object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsStrategyMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *PsStrategyMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetOwner sets the "owner" field.
+func (m *PsStrategyMutation) SetOwner(u uint64) {
+	m.owner = &u
+	m.addowner = nil
+}
+
+// Owner returns the value of the "owner" field in the mutation.
+func (m *PsStrategyMutation) Owner() (r uint64, exists bool) {
+	v := m.owner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwner returns the old "owner" field's value of the PsStrategy entity.
+// If the PsStrategy object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsStrategyMutation) OldOwner(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwner is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwner requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwner: %w", err)
+	}
+	return oldValue.Owner, nil
+}
+
+// AddOwner adds u to the "owner" field.
+func (m *PsStrategyMutation) AddOwner(u int64) {
+	if m.addowner != nil {
+		*m.addowner += u
+	} else {
+		m.addowner = &u
+	}
+}
+
+// AddedOwner returns the value that was added to the "owner" field in this mutation.
+func (m *PsStrategyMutation) AddedOwner() (r int64, exists bool) {
+	v := m.addowner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOwner resets all changes to the "owner" field.
+func (m *PsStrategyMutation) ResetOwner() {
+	m.owner = nil
+	m.addowner = nil
+}
+
+// SetScriptContent sets the "script_content" field.
+func (m *PsStrategyMutation) SetScriptContent(s string) {
+	m.script_content = &s
+}
+
+// ScriptContent returns the value of the "script_content" field in the mutation.
+func (m *PsStrategyMutation) ScriptContent() (r string, exists bool) {
+	v := m.script_content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScriptContent returns the old "script_content" field's value of the PsStrategy entity.
+// If the PsStrategy object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsStrategyMutation) OldScriptContent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScriptContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScriptContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScriptContent: %w", err)
+	}
+	return oldValue.ScriptContent, nil
+}
+
+// ResetScriptContent resets all changes to the "script_content" field.
+func (m *PsStrategyMutation) ResetScriptContent() {
+	m.script_content = nil
+}
+
+// SetIsDelete sets the "is_delete" field.
+func (m *PsStrategyMutation) SetIsDelete(i int) {
+	m.is_delete = &i
+	m.addis_delete = nil
+}
+
+// IsDelete returns the value of the "is_delete" field in the mutation.
+func (m *PsStrategyMutation) IsDelete() (r int, exists bool) {
+	v := m.is_delete
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsDelete returns the old "is_delete" field's value of the PsStrategy entity.
+// If the PsStrategy object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PsStrategyMutation) OldIsDelete(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsDelete is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsDelete requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsDelete: %w", err)
+	}
+	return oldValue.IsDelete, nil
+}
+
+// AddIsDelete adds i to the "is_delete" field.
+func (m *PsStrategyMutation) AddIsDelete(i int) {
+	if m.addis_delete != nil {
+		*m.addis_delete += i
+	} else {
+		m.addis_delete = &i
+	}
+}
+
+// AddedIsDelete returns the value that was added to the "is_delete" field in this mutation.
+func (m *PsStrategyMutation) AddedIsDelete() (r int, exists bool) {
+	v := m.addis_delete
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetIsDelete resets all changes to the "is_delete" field.
+func (m *PsStrategyMutation) ResetIsDelete() {
+	m.is_delete = nil
+	m.addis_delete = nil
+}
+
+// Where appends a list predicates to the PsStrategyMutation builder.
+func (m *PsStrategyMutation) Where(ps ...predicate.PsStrategy) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PsStrategyMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PsStrategyMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PsStrategy, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PsStrategyMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PsStrategyMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PsStrategy).
+func (m *PsStrategyMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PsStrategyMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.created_at != nil {
+		fields = append(fields, psstrategy.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, psstrategy.FieldUpdatedAt)
+	}
+	if m.owner != nil {
+		fields = append(fields, psstrategy.FieldOwner)
+	}
+	if m.script_content != nil {
+		fields = append(fields, psstrategy.FieldScriptContent)
+	}
+	if m.is_delete != nil {
+		fields = append(fields, psstrategy.FieldIsDelete)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PsStrategyMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case psstrategy.FieldCreatedAt:
+		return m.CreatedAt()
+	case psstrategy.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case psstrategy.FieldOwner:
+		return m.Owner()
+	case psstrategy.FieldScriptContent:
+		return m.ScriptContent()
+	case psstrategy.FieldIsDelete:
+		return m.IsDelete()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PsStrategyMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case psstrategy.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case psstrategy.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case psstrategy.FieldOwner:
+		return m.OldOwner(ctx)
+	case psstrategy.FieldScriptContent:
+		return m.OldScriptContent(ctx)
+	case psstrategy.FieldIsDelete:
+		return m.OldIsDelete(ctx)
+	}
+	return nil, fmt.Errorf("unknown PsStrategy field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PsStrategyMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case psstrategy.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case psstrategy.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case psstrategy.FieldOwner:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwner(v)
+		return nil
+	case psstrategy.FieldScriptContent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScriptContent(v)
+		return nil
+	case psstrategy.FieldIsDelete:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsDelete(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PsStrategy field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PsStrategyMutation) AddedFields() []string {
+	var fields []string
+	if m.addowner != nil {
+		fields = append(fields, psstrategy.FieldOwner)
+	}
+	if m.addis_delete != nil {
+		fields = append(fields, psstrategy.FieldIsDelete)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PsStrategyMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case psstrategy.FieldOwner:
+		return m.AddedOwner()
+	case psstrategy.FieldIsDelete:
+		return m.AddedIsDelete()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PsStrategyMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case psstrategy.FieldOwner:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOwner(v)
+		return nil
+	case psstrategy.FieldIsDelete:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddIsDelete(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PsStrategy numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PsStrategyMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PsStrategyMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PsStrategyMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown PsStrategy nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PsStrategyMutation) ResetField(name string) error {
+	switch name {
+	case psstrategy.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case psstrategy.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case psstrategy.FieldOwner:
+		m.ResetOwner()
+		return nil
+	case psstrategy.FieldScriptContent:
+		m.ResetScriptContent()
+		return nil
+	case psstrategy.FieldIsDelete:
+		m.ResetIsDelete()
+		return nil
+	}
+	return fmt.Errorf("unknown PsStrategy field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PsStrategyMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PsStrategyMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PsStrategyMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PsStrategyMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PsStrategyMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PsStrategyMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PsStrategyMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown PsStrategy unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PsStrategyMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown PsStrategy edge %s", name)
+}
 
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
@@ -170,7 +2072,7 @@ func (m *UserMutation) CreatedAt() (r time.Time, exists bool) {
 // OldCreatedAt returns the old "created_at" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldCreatedAt(ctx context.Context) (v *time.Time, err error) {
+func (m *UserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -184,22 +2086,9 @@ func (m *UserMutation) OldCreatedAt(ctx context.Context) (v *time.Time, err erro
 	return oldValue.CreatedAt, nil
 }
 
-// ClearCreatedAt clears the value of the "created_at" field.
-func (m *UserMutation) ClearCreatedAt() {
-	m.created_at = nil
-	m.clearedFields[user.FieldCreatedAt] = struct{}{}
-}
-
-// CreatedAtCleared returns if the "created_at" field was cleared in this mutation.
-func (m *UserMutation) CreatedAtCleared() bool {
-	_, ok := m.clearedFields[user.FieldCreatedAt]
-	return ok
-}
-
 // ResetCreatedAt resets all changes to the "created_at" field.
 func (m *UserMutation) ResetCreatedAt() {
 	m.created_at = nil
-	delete(m.clearedFields, user.FieldCreatedAt)
 }
 
 // SetUpdatedAt sets the "updated_at" field.
@@ -219,7 +2108,7 @@ func (m *UserMutation) UpdatedAt() (r time.Time, exists bool) {
 // OldUpdatedAt returns the old "updated_at" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v *time.Time, err error) {
+func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
@@ -233,22 +2122,9 @@ func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v *time.Time, err erro
 	return oldValue.UpdatedAt, nil
 }
 
-// ClearUpdatedAt clears the value of the "updated_at" field.
-func (m *UserMutation) ClearUpdatedAt() {
-	m.updated_at = nil
-	m.clearedFields[user.FieldUpdatedAt] = struct{}{}
-}
-
-// UpdatedAtCleared returns if the "updated_at" field was cleared in this mutation.
-func (m *UserMutation) UpdatedAtCleared() bool {
-	_, ok := m.clearedFields[user.FieldUpdatedAt]
-	return ok
-}
-
 // ResetUpdatedAt resets all changes to the "updated_at" field.
 func (m *UserMutation) ResetUpdatedAt() {
 	m.updated_at = nil
-	delete(m.clearedFields, user.FieldUpdatedAt)
 }
 
 // SetDeletedAt sets the "deleted_at" field.
@@ -861,12 +2737,6 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(user.FieldCreatedAt) {
-		fields = append(fields, user.FieldCreatedAt)
-	}
-	if m.FieldCleared(user.FieldUpdatedAt) {
-		fields = append(fields, user.FieldUpdatedAt)
-	}
 	if m.FieldCleared(user.FieldDeletedAt) {
 		fields = append(fields, user.FieldDeletedAt)
 	}
@@ -902,12 +2772,6 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
 	switch name {
-	case user.FieldCreatedAt:
-		m.ClearCreatedAt()
-		return nil
-	case user.FieldUpdatedAt:
-		m.ClearUpdatedAt()
-		return nil
 	case user.FieldDeletedAt:
 		m.ClearDeletedAt()
 		return nil

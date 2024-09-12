@@ -9,11 +9,62 @@ import (
 )
 
 var (
-	// UserColumns holds the columns for the "user" table.
-	UserColumns = []*schema.Column{
+	// PsConfigsColumns holds the columns for the "ps_configs" table.
+	PsConfigsColumns = []*schema.Column{
+		{Name: "ps_id", Type: field.TypeUint64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "ps_scene", Type: field.TypeString, Unique: true},
+		{Name: "ps_filter", Type: field.TypeUint64},
+		{Name: "ps_message", Type: field.TypeUint64, Nullable: true},
+		{Name: "ps_event", Type: field.TypeUint64, Nullable: true},
+		{Name: "ps_feature", Type: field.TypeUint64, Nullable: true},
+		{Name: "owner_id", Type: field.TypeUint64, Nullable: true},
+		{Name: "managers", Type: field.TypeString, Nullable: true},
+		{Name: "update_user", Type: field.TypeUint64, Nullable: true},
+		{Name: "ps_strategy", Type: field.TypeUint64, Nullable: true},
+	}
+	// PsConfigsTable holds the schema information for the "ps_configs" table.
+	PsConfigsTable = &schema.Table{
+		Name:       "ps_configs",
+		Columns:    PsConfigsColumns,
+		PrimaryKey: []*schema.Column{PsConfigsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ps_configs_ps_strategies_strategy",
+				Columns:    []*schema.Column{PsConfigsColumns[11]},
+				RefColumns: []*schema.Column{PsStrategiesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "psconfig_ps_scene",
+				Unique:  true,
+				Columns: []*schema.Column{PsConfigsColumns[3]},
+			},
+		},
+	}
+	// PsStrategiesColumns holds the columns for the "ps_strategies" table.
+	PsStrategiesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint64, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Nullable: true},
-		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "owner", Type: field.TypeUint64},
+		{Name: "script_content", Type: field.TypeString, Size: 2147483647},
+		{Name: "is_delete", Type: field.TypeInt, Default: 0},
+	}
+	// PsStrategiesTable holds the schema information for the "ps_strategies" table.
+	PsStrategiesTable = &schema.Table{
+		Name:       "ps_strategies",
+		Columns:    PsStrategiesColumns,
+		PrimaryKey: []*schema.Column{PsStrategiesColumns[0]},
+	}
+	// UsersColumns holds the columns for the "users" table.
+	UsersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "user_name", Type: field.TypeString, Unique: true, Size: 256},
 		{Name: "email", Type: field.TypeString, Nullable: true, Size: 256},
@@ -23,20 +74,26 @@ var (
 		{Name: "avatar", Type: field.TypeString, Nullable: true, Size: 1000},
 		{Name: "money", Type: field.TypeString, Nullable: true, Size: 256},
 	}
-	// UserTable holds the schema information for the "user" table.
-	UserTable = &schema.Table{
-		Name:       "user",
-		Columns:    UserColumns,
-		PrimaryKey: []*schema.Column{UserColumns[0]},
+	// UsersTable holds the schema information for the "users" table.
+	UsersTable = &schema.Table{
+		Name:       "users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		UserTable,
+		PsConfigsTable,
+		PsStrategiesTable,
+		UsersTable,
 	}
 )
 
 func init() {
-	UserTable.Annotation = &entsql.Annotation{
-		Table: "user",
+	PsConfigsTable.ForeignKeys[0].RefTable = PsStrategiesTable
+	PsConfigsTable.Annotation = &entsql.Annotation{
+		Table: "ps_configs",
+	}
+	UsersTable.Annotation = &entsql.Annotation{
+		Table: "users",
 	}
 }

@@ -14,12 +14,7 @@ func ResponseMiddleware() gin.HandlerFunc {
 		if c.Writer.Status() == http.StatusOK {
 			// TODO 待核实 res为nil时候Get的返回结果exists
 			if data, exists := c.Get("data"); exists {
-				switch v := data.(type) {
-				case []any:
-					c.JSON(http.StatusOK, NewMultiResponse(v))
-				default:
-					c.JSON(http.StatusOK, NewSingleResponse(v))
-				}
+				c.JSON(http.StatusOK, NewCommonResponse(data))
 			} else {
 				c.JSON(http.StatusOK, NewSuccessResponse())
 			}

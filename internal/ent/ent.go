@@ -6,6 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"fx-web/internal/ent/psconfig"
+	"fx-web/internal/ent/psstrategy"
 	"fx-web/internal/ent/user"
 	"reflect"
 	"sync"
@@ -73,7 +75,9 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			user.Table: user.ValidColumn,
+			psconfig.Table:   psconfig.ValidColumn,
+			psstrategy.Table: psstrategy.ValidColumn,
+			user.Table:       user.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

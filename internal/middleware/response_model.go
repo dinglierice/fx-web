@@ -4,12 +4,14 @@ type Response struct {
 	Success    bool   `json:"success"`
 	ErrCode    string `json:"errCode,omitempty"`
 	ErrMessage string `json:"errMessage,omitempty"`
+	Type       string `json:"type,omitempty"`
 }
 
 // NewSuccessResponse 构建一个成功响应
 func NewSuccessResponse() *Response {
 	return &Response{
 		Success: true,
+		Type:    "BaseResponse",
 	}
 }
 
@@ -19,6 +21,7 @@ func NewErrorResponse(errCode, errMessage string) *Response {
 		Success:    false,
 		ErrCode:    errCode,
 		ErrMessage: errMessage,
+		Type:       "ErrorResponse",
 	}
 }
 
@@ -28,27 +31,12 @@ type SingleResponse struct {
 	Data any `json:"data,omitempty"`
 }
 
-// NewSingleResponse 构建一个包含单个数据项的成功响应
-func NewSingleResponse(data any) *SingleResponse {
+// NewCommonResponse 构建一个包含单个数据项的成功响应
+func NewCommonResponse(data any) *SingleResponse {
 	return &SingleResponse{
 		Response: Response{
 			Success: true,
-		},
-		Data: data,
-	}
-}
-
-// MultiResponse 是一个包含多个数据项的响应结构体
-type MultiResponse struct {
-	Response
-	Data []interface{} `json:"data,omitempty"`
-}
-
-// NewMultiResponse 构建一个包含多个数据项的成功响应
-func NewMultiResponse(data []any) *MultiResponse {
-	return &MultiResponse{
-		Response: Response{
-			Success: true,
+			Type:    "CommonResponse",
 		},
 		Data: data,
 	}

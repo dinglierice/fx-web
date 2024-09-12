@@ -6,7 +6,6 @@ import (
 	"fx-web/internal/ent"
 )
 
-// TODO 待实现
 type userRepository struct {
 	db *ent.Client
 }

@@ -6,5 +6,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// PsConfig is the predicate function for psconfig builders.
+type PsConfig func(*sql.Selector)
+
+// PsStrategy is the predicate function for psstrategy builders.
+type PsStrategy func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

@@ -8,6 +8,30 @@ import (
 	"fx-web/internal/ent"
 )
 
+// The PsConfigFunc type is an adapter to allow the use of ordinary
+// function as PsConfig mutator.
+type PsConfigFunc func(context.Context, *ent.PsConfigMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PsConfigFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PsConfigMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PsConfigMutation", m)
+}
+
+// The PsStrategyFunc type is an adapter to allow the use of ordinary
+// function as PsStrategy mutator.
+type PsStrategyFunc func(context.Context, *ent.PsStrategyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PsStrategyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PsStrategyMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PsStrategyMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)

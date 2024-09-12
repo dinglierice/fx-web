@@ -13,8 +13,11 @@ type UserHandler struct {
 	logger  *zap.Logger
 }
 
-func NewUserHandler(service domain.UserService) *UserHandler {
-	return &UserHandler{service: service}
+func NewUserHandler(service domain.UserService, logger *zap.Logger) *UserHandler {
+	return &UserHandler{
+		service: service,
+		logger:  logger,
+	}
 }
 
 func (u *UserHandler) UserLogin(c *gin.Context) {
@@ -28,7 +31,7 @@ func (u *UserHandler) UserLogin(c *gin.Context) {
 	}
 }
 
-// UserQueryTest TODO 这种Set写法和直接c.JSON的区别是什么
+// UserQueryTest 用于接口测试
 func (u *UserHandler) UserQueryTest(c *gin.Context) {
 	idString := c.Param("id")
 	pId, _ := strconv.ParseUint(idString, 10, 64)
