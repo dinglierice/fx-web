@@ -25,11 +25,11 @@ func NewErrorResponse(errCode, errMessage string) *Response {
 // SingleResponse 是一个包含单个数据项的响应结构体
 type SingleResponse struct {
 	Response
-	Data interface{} `json:"data,omitempty"`
+	Data any `json:"data,omitempty"`
 }
 
 // NewSingleResponse 构建一个包含单个数据项的成功响应
-func NewSingleResponse(data interface{}) *SingleResponse {
+func NewSingleResponse(data any) *SingleResponse {
 	return &SingleResponse{
 		Response: Response{
 			Success: true,
@@ -45,7 +45,7 @@ type MultiResponse struct {
 }
 
 // NewMultiResponse 构建一个包含多个数据项的成功响应
-func NewMultiResponse(data []interface{}) *MultiResponse {
+func NewMultiResponse(data []any) *MultiResponse {
 	return &MultiResponse{
 		Response: Response{
 			Success: true,

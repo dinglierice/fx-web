@@ -4,6 +4,7 @@ import (
 	"fx-web/internal/domain"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"net/http"
 	"strconv"
 )
 
@@ -27,15 +28,17 @@ func (u *UserHandler) UserLogin(c *gin.Context) {
 	}
 }
 
+// UserQueryTest TODO 这种Set写法和直接c.JSON的区别是什么
 func (u *UserHandler) UserQueryTest(c *gin.Context) {
 	idString := c.Param("id")
 	pId, _ := strconv.ParseUint(idString, 10, 64)
 	user, err := u.service.GetUser(c, pId)
 	if err != nil {
-		return
+		c.Set("errCode", 400)
+		c.Set("errMessage", err.Error())
+		c.Status(http.StatusBadRequest)
+	} else {
+		c.Set("data", user)
+		c.Status(http.StatusOK)
 	}
-	c.JSON(200, gin.H{
-		"message": "query",
-		"data":    user,
-	})
 }
