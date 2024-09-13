@@ -53,6 +53,8 @@ func (s *psConfigService) DeleteConfig(ctx context.Context, id uint64) error {
 	return s.repo.Delete(ctx, id)
 }
 
+// ListConfigs lists all configs.
+// TODO 什么时候开启协成
 func (s *psConfigService) ListConfigs(ctx context.Context, limit, offset int) ([]*domain.PsConfig, error) {
 	entConfigs, err := s.repo.List(ctx, limit, offset)
 	if err != nil {
