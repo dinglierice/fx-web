@@ -3,11 +3,16 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
 )
 
 // ResponseMiddleware TODO 待测试
 func ResponseMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, "/swagger") {
+			c.Next()
+			return
+		}
 		c.Next()
 
 		// 获取响应数据

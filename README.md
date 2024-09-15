@@ -19,3 +19,14 @@ func (User) Annotations() []schema.Annotation {
 }
 ```
 
+## 2. init swaggo
+```golang
+go install github.com/swaggo/swag/cmd/swag@latest
+
+swag init -g ./cmd/main.go -o docs
+
+go get -u github.com/swaggo/gin-swagger
+go get -u github.com/swaggo/files
+
+
+```

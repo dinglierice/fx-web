@@ -44,7 +44,17 @@ func (u *UserHandler) UserLogin(c *gin.Context) {
 	}
 }
 
-// UserQueryTest 用于接口测试
+// @BasePath /api/v1
+
+// UserQueryTest @Summary 用于测试获取用户信息
+// @Description 获取用户信息接口
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param id path uint64 true "用户ID"
+// @Success 200 {object} domain.User "用户信息"
+// @Failure 400 {object} any "请求错误"
+// @Router /user/queryTest/{id} [get]
 func (u *UserHandler) UserQueryTest(c *gin.Context) {
 	idString := c.Param("id")
 	pId, _ := strconv.ParseUint(idString, 10, 64)

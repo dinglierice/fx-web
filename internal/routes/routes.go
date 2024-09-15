@@ -1,8 +1,11 @@
 package routes
 
 import (
+	docs "fx-web/docs"
 	"fx-web/internal/routes/handler"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // 接口:Routes, 提供设置路由的SetupRoutes方法
@@ -20,15 +23,21 @@ type GinRoutes struct {
 }
 
 func (ginRoutes *GinRoutes) SetupRoutes(r *gin.Engine) {
-	// 健康检查路由
-	r.GET("/health", handler.HealthCheck)
-	// 用户路由
-	r.POST("/user/register", ginRoutes.userHandler.UserRegister)
-	r.POST("/user/login", ginRoutes.userHandler.UserLogin)
-	r.GET("/user/queryTest/:id", ginRoutes.userHandler.UserQueryTest)
+	v1 := r.Group("/api/v1")
+	{
+		// 健康检查路由
+		v1.GET("health", handler.HealthCheck)
+		// 用户路由
+		v1.POST("user/register", ginRoutes.userHandler.UserRegister)
+		v1.POST("user/login", ginRoutes.userHandler.UserLogin)
+		v1.GET("user/queryTest/:id", ginRoutes.userHandler.UserQueryTest)
 
-	// 策略路由
-	r.GET("/configs/list", ginRoutes.configHandler.List)
+		// 策略路由
+		v1.GET("configs/list", ginRoutes.configHandler.List)
+	}
+
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 }
 
 func ProvideRoutes(userHandler *handler.UserHandler, configHandler *handler.ConfigHandler) Routes {
