@@ -22,6 +22,7 @@ func NewUserHandler(service domain.UserService, logger *zap.Logger) *UserHandler
 }
 
 // TODO SWAGGO文档中返回值到底应该怎么表示
+// TODO 用户注册这部分,起初为了维护service涉及实体的干净, 把过多的逻辑放在了handler中, 待探索和修改, 目前阶段暂时按照service兼职实体转换的方式去做
 
 // @BasePath /api/v1
 
