@@ -31,3 +31,22 @@ type UserService interface {
 	DeleteUser(ctx context.Context, id string) error
 	Login(ctx context.Context, user *User) error
 }
+
+type UserDTO struct {
+	NickName string `form:"nick_name" json:"nick_name"`
+	UserName string `form:"user_name" json:"user_name"`
+	Password string `form:"password" json:"password"`
+	Key      string `form:"key" json:"key"`
+}
+
+func (dto *UserDTO) ToUser(passwordDigest string) *User {
+	return &User{
+		UserName:       dto.UserName,
+		Email:          "", // Email should be set separately if needed
+		PasswordDigest: passwordDigest,
+		NickName:       dto.NickName,
+		Status:         "", // Status should be set separately if needed
+		Avatar:         "", // Avatar should be set separately if needed
+		Money:          "", // Money should be set separately if needed
+	}
+}

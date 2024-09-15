@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fx-web/internal/domain"
+	"fx-web/internal/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
@@ -20,17 +21,54 @@ func NewUserHandler(service domain.UserService, logger *zap.Logger) *UserHandler
 	}
 }
 
+// TODO SWAGGO文档中返回值到底应该怎么表示
+
+// @BasePath /api/v1
+
+// UserRegister godoc
+// @Summary Register a new user
+// @Description Register a new user with the provided details
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param userDto body domain.UserDTO true "User DTO"
+// @Success 200 {object} string
+// @Failure 400 {object} any
+// @Failure 500 {object} any
+// @Router /users/register [post]
 func (u *UserHandler) UserRegister(c *gin.Context) {
-	user := &domain.User{}
-	if err := c.ShouldBind(user); err == nil {
-		_ = u.service.CreateUser(c.Request.Context(), user)
-		c.Status(200)
-		c.Set("data", "注册成功")
-	} else {
+	userDto := &domain.UserDTO{}
+	if err := c.ShouldBind(userDto); err != nil {
+		u.logger.Error("Failed to bind user DTO", zap.Error(err))
+		c.Status(http.StatusBadRequest)
 		c.Set("errCode", 400)
 		c.Set("errMessage", err.Error())
-		c.Status(http.StatusBadRequest)
+		return
 	}
+
+	encryptedPassword, err := utils.Encrypt([]byte(userDto.Key), userDto.Password)
+	if err != nil {
+		u.logger.Error("Failed to encrypt password", zap.Error(err))
+		c.Status(http.StatusBadRequest)
+		c.Set("errCode", 400)
+		c.Set("errMessage", err.Error())
+		return
+	}
+
+	// Convert UserDTO to User
+	user := userDto.ToUser(encryptedPassword)
+	// Create the user
+	err = u.service.CreateUser(c.Request.Context(), user)
+	if err != nil {
+		u.logger.Error("Failed to create user", zap.Error(err))
+		c.Status(http.StatusInternalServerError)
+		c.Set("errCode", 400)
+		c.Set("errMessage", err.Error())
+		return
+	}
+
+	c.Status(http.StatusOK)
+	c.Set("data", "注册成功")
 }
 
 func (u *UserHandler) UserLogin(c *gin.Context) {

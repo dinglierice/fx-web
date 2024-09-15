@@ -33,7 +33,25 @@ func (s *userService) GetUser(ctx context.Context, id uint64) (*domain.User, err
 }
 
 func (s *userService) CreateUser(ctx context.Context, user *domain.User) error {
-	// 可以在这里添加业务逻辑,比如验证
+	//if user.UserName == "" || user.Email == "" || user.PasswordDigest == "" {
+	//	return errors.New("missing required fields")
+	//}
+	//
+	//encryptedPassword, err := utils.Encrypt(s.Key, user.PasswordDigest)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//user.PasswordDigest = encryptedPassword
+
+	// 这里可以添加其他业务逻辑，例如验证用户是否已存在
+
+	// 将用户保存到数据库
+	// err = s.saveUserToDB(user)
+	// if err != nil {
+	//     return err
+	// }
+
 	return nil
 }
 

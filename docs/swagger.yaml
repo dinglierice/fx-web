@@ -51,6 +51,17 @@ definitions:
       userName:
         type: string
     type: object
+  domain.UserDTO:
+    properties:
+      key:
+        type: string
+      nick_name:
+        type: string
+      password:
+        type: string
+      user_name:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -109,4 +120,34 @@ paths:
             type: object
       tags:
       - user
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with the provided details
+      parameters:
+      - description: User DTO
+        in: body
+        name: userDto
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            type: object
+      summary: Register a new user
+      tags:
+      - users
 swagger: "2.0"
