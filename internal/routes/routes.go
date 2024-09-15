@@ -23,6 +23,7 @@ func (ginRoutes *GinRoutes) SetupRoutes(r *gin.Engine) {
 	// 健康检查路由
 	r.GET("/health", handler.HealthCheck)
 	// 用户路由
+	r.POST("/user/register", ginRoutes.userHandler.UserRegister)
 	r.POST("/user/login", ginRoutes.userHandler.UserLogin)
 	r.GET("/user/queryTest/:id", ginRoutes.userHandler.UserQueryTest)
 

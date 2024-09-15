@@ -20,6 +20,19 @@ func NewUserHandler(service domain.UserService, logger *zap.Logger) *UserHandler
 	}
 }
 
+func (u *UserHandler) UserRegister(c *gin.Context) {
+	user := &domain.User{}
+	if err := c.ShouldBind(user); err == nil {
+		_ = u.service.CreateUser(c.Request.Context(), user)
+		c.Status(200)
+		c.Set("data", "注册成功")
+	} else {
+		c.Set("errCode", 400)
+		c.Set("errMessage", err.Error())
+		c.Status(http.StatusBadRequest)
+	}
+}
+
 func (u *UserHandler) UserLogin(c *gin.Context) {
 	user := &domain.User{}
 	if err := c.ShouldBind(user); err == nil {
