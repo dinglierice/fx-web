@@ -36,7 +36,7 @@ func NewUserHandler(service domain.UserService, logger *zap.Logger) *UserHandler
 // @Success 200 {object} middleware.CommonResponse{data=string} "success"
 // @Failure 400 {object} middleware.Response
 // @Failure 500 {object} middleware.Response
-// @Router /users/register [post]
+// @Router /user/register [post]
 func (u *UserHandler) UserRegister(c *gin.Context) {
 	userDto := &domain.UserDTO{}
 	if err := c.ShouldBind(userDto); err != nil {
@@ -47,9 +47,17 @@ func (u *UserHandler) UserRegister(c *gin.Context) {
 		return
 	}
 
-	encryptedPassword, err := utils.Encrypt([]byte(userDto.Key), userDto.Password)
+	if userDto.Key == "" || len(userDto.Key) != 16 {
+		u.logger.Error("密钥长度不够")
+		c.Status(http.StatusBadRequest)
+		c.Set("errCode", 400)
+		c.Set("errMessage", "密钥长度不够")
+		return
+	}
+
+	money, err := utils.Encrypt([]byte(userDto.Key), "10000")
 	if err != nil {
-		u.logger.Error("Failed to encrypt password", zap.Error(err))
+		u.logger.Error("Failed to encrypt initial money", zap.Error(err))
 		c.Status(http.StatusBadRequest)
 		c.Set("errCode", 400)
 		c.Set("errMessage", err.Error())
@@ -57,9 +65,10 @@ func (u *UserHandler) UserRegister(c *gin.Context) {
 	}
 
 	// Convert UserDTO to User
-	user := userDto.ToUser(encryptedPassword)
+	user := userDto.ToUser(userDto.Password)
+	user.Money = money
 	// Create the user
-	err = u.service.CreateUser(c.Request.Context(), user)
+	err = u.service.CreateUser(c, user)
 	if err != nil {
 		u.logger.Error("Failed to create user", zap.Error(err))
 		c.Status(http.StatusInternalServerError)

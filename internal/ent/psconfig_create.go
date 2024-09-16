@@ -41,6 +41,14 @@ func (pcc *PsConfigCreate) SetUpdatedAt(t time.Time) *PsConfigCreate {
 	return pcc
 }
 
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (pcc *PsConfigCreate) SetNillableUpdatedAt(t *time.Time) *PsConfigCreate {
+	if t != nil {
+		pcc.SetUpdatedAt(*t)
+	}
+	return pcc
+}
+
 // SetPsScene sets the "ps_scene" field.
 func (pcc *PsConfigCreate) SetPsScene(s string) *PsConfigCreate {
 	pcc.mutation.SetPsScene(s)
@@ -214,6 +222,10 @@ func (pcc *PsConfigCreate) defaults() {
 	if _, ok := pcc.mutation.CreatedAt(); !ok {
 		v := psconfig.DefaultCreatedAt()
 		pcc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := pcc.mutation.UpdatedAt(); !ok {
+		v := psconfig.DefaultUpdatedAt()
+		pcc.mutation.SetUpdatedAt(v)
 	}
 }
 

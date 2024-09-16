@@ -40,6 +40,14 @@ func (psc *PsStrategyCreate) SetUpdatedAt(t time.Time) *PsStrategyCreate {
 	return psc
 }
 
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (psc *PsStrategyCreate) SetNillableUpdatedAt(t *time.Time) *PsStrategyCreate {
+	if t != nil {
+		psc.SetUpdatedAt(*t)
+	}
+	return psc
+}
+
 // SetOwner sets the "owner" field.
 func (psc *PsStrategyCreate) SetOwner(u uint64) *PsStrategyCreate {
 	psc.mutation.SetOwner(u)
@@ -110,6 +118,10 @@ func (psc *PsStrategyCreate) defaults() {
 	if _, ok := psc.mutation.CreatedAt(); !ok {
 		v := psstrategy.DefaultCreatedAt()
 		psc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := psc.mutation.UpdatedAt(); !ok {
+		v := psstrategy.DefaultUpdatedAt()
+		psc.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := psc.mutation.IsDelete(); !ok {
 		v := psstrategy.DefaultIsDelete

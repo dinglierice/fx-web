@@ -123,7 +123,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/register": {
+        "/user/register": {
             "post": {
                 "description": "Register a new user with the provided details",
                 "consumes": [

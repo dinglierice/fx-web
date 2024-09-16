@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fx-web/internal/domain"
+	"fx-web/internal/ent"
 	"go.uber.org/zap"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type userService struct {
@@ -33,24 +36,38 @@ func (s *userService) GetUser(ctx context.Context, id uint64) (*domain.User, err
 }
 
 func (s *userService) CreateUser(ctx context.Context, user *domain.User) error {
-	//if user.UserName == "" || user.Email == "" || user.PasswordDigest == "" {
-	//	return errors.New("missing required fields")
-	//}
-	//
-	//encryptedPassword, err := utils.Encrypt(s.Key, user.PasswordDigest)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//user.PasswordDigest = encryptedPassword
+	if user.UserName == "" || user.PasswordDigest == "" {
+		return errors.New("missing required fields")
+	}
 
-	// 这里可以添加其他业务逻辑，例如验证用户是否已存在
+	// 用户是否已经存在
+	existedUser, err := s.repo.GetByName(ctx, user.UserName)
+	if err != nil {
+		s.logger.Info("GetUser repo execute error", zap.Error(err))
+		return err
+	}
+	if existedUser != nil {
+		return errors.New("user already exists")
+	}
+
+	// 密码加密
+	password, err := genPassword(user.PasswordDigest)
+	if err != nil {
+		return err
+	}
 
 	// 将用户保存到数据库
-	// err = s.saveUserToDB(user)
-	// if err != nil {
-	//     return err
-	// }
+	userDo := &ent.User{
+		NickName:       user.NickName,
+		UserName:       user.UserName,
+		Status:         domain.Active,
+		PasswordDigest: password,
+		Money:          user.Money, // 初始金额
+	}
+	err = s.repo.Create(ctx, userDo)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -67,4 +84,12 @@ func (s *userService) DeleteUser(ctx context.Context, id string) error {
 func (s *userService) Login(ctx context.Context, user *domain.User) error {
 	// TODO 看似无需新增repo接口, 复现下参数校验逻辑即可
 	return nil
+}
+
+func genPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), domain.PassWordCost)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
 }

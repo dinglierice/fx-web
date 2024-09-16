@@ -25,6 +25,8 @@ func init() {
 	psconfig.DefaultCreatedAt = psconfigDescCreatedAt.Default.(func() time.Time)
 	// psconfigDescUpdatedAt is the schema descriptor for updated_at field.
 	psconfigDescUpdatedAt := psconfigMixinFields0[1].Descriptor()
+	// psconfig.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	psconfig.DefaultUpdatedAt = psconfigDescUpdatedAt.Default.(func() time.Time)
 	// psconfig.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	psconfig.UpdateDefaultUpdatedAt = psconfigDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// psconfigDescPsScene is the schema descriptor for ps_scene field.
@@ -46,6 +48,8 @@ func init() {
 	psstrategy.DefaultCreatedAt = psstrategyDescCreatedAt.Default.(func() time.Time)
 	// psstrategyDescUpdatedAt is the schema descriptor for updated_at field.
 	psstrategyDescUpdatedAt := psstrategyMixinFields0[1].Descriptor()
+	// psstrategy.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	psstrategy.DefaultUpdatedAt = psstrategyDescUpdatedAt.Default.(func() time.Time)
 	// psstrategy.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	psstrategy.UpdateDefaultUpdatedAt = psstrategyDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// psstrategyDescIsDelete is the schema descriptor for is_delete field.
@@ -67,6 +71,8 @@ func init() {
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescUpdatedAt is the schema descriptor for updated_at field.
 	userDescUpdatedAt := userMixinFields0[1].Descriptor()
+	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// userDescUserName is the schema descriptor for user_name field.

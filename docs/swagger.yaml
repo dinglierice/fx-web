@@ -153,7 +153,7 @@ paths:
             $ref: '#/definitions/middleware.Response'
       tags:
       - user
-  /users/register:
+  /user/register:
     post:
       consumes:
       - application/json
