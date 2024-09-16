@@ -55,7 +55,7 @@ func (u *UserHandler) UserRegister(c *gin.Context) {
 		return
 	}
 
-	money, err := utils.Encrypt([]byte(userDto.Key), "10000")
+	money, err := utils.AesEncoding("10000", []byte(userDto.Key))
 	if err != nil {
 		u.logger.Error("Failed to encrypt initial money", zap.Error(err))
 		c.Status(http.StatusBadRequest)

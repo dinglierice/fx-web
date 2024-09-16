@@ -55,11 +55,11 @@ func Decrypt(key []byte, cryptoText string) (string, error) {
 	return string(data), nil
 }
 
-func AesEncoding(src string, key []byte) string {
+func AesEncoding(src string, key []byte) (string, error) {
 	srcByte := []byte(src)
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return src
+		return src, err
 	}
 	// 密码填充
 	NewSrcByte := PadPwd(srcByte, block.BlockSize()) // 由于字节长度不够，所以要进行字节的填充
@@ -67,7 +67,7 @@ func AesEncoding(src string, key []byte) string {
 	block.Encrypt(dst, NewSrcByte)
 	// base64 编码
 	pwd := base64.StdEncoding.EncodeToString(dst)
-	return pwd
+	return pwd, nil
 }
 
 func PadPwd(srcByte []byte, blockSize int) []byte {
