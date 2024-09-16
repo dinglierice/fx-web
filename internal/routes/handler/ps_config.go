@@ -22,8 +22,8 @@ type ConfigHandler struct {
 // @Produce json
 // @Param pageNo path int true "页码"
 // @Param pageSize path int true "每页数量"
-// @Success 200 {array} domain.PsConfig "配置列表"
-// @Failure 400 {object} any "请求错误"
+// @Success 200 {object} middleware.CommonResponse{data=[]domain.PsConfig} "配置列表"
+// @Failure 400 {object} middleware.Response "请求错误"
 // @Router /configs/list [get]
 func (h ConfigHandler) List(c *gin.Context) {
 	pageNoString := c.Param("pageNo")

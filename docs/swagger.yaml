@@ -62,6 +62,29 @@ definitions:
       user_name:
         type: string
     type: object
+  middleware.CommonResponse:
+    properties:
+      data: {}
+      errCode:
+        type: string
+      errMessage:
+        type: string
+      success:
+        type: boolean
+      type:
+        type: string
+    type: object
+  middleware.Response:
+    properties:
+      errCode:
+        type: string
+      errMessage:
+        type: string
+      success:
+        type: boolean
+      type:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -87,13 +110,18 @@ paths:
         "200":
           description: 配置列表
           schema:
-            items:
-              $ref: '#/definitions/domain.PsConfig'
-            type: array
+            allOf:
+            - $ref: '#/definitions/middleware.CommonResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.PsConfig'
+                  type: array
+              type: object
         "400":
           description: 请求错误
           schema:
-            type: object
+            $ref: '#/definitions/middleware.Response'
       tags:
       - config
   /user/queryTest/{id}:
@@ -111,13 +139,18 @@ paths:
       - application/json
       responses:
         "200":
-          description: 用户信息
+          description: success
           schema:
-            $ref: '#/definitions/domain.User'
+            allOf:
+            - $ref: '#/definitions/middleware.CommonResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
         "400":
-          description: 请求错误
+          description: error
           schema:
-            type: object
+            $ref: '#/definitions/middleware.Response'
       tags:
       - user
   /users/register:
@@ -136,17 +169,22 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: success
           schema:
-            type: string
+            allOf:
+            - $ref: '#/definitions/middleware.CommonResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
         "400":
           description: Bad Request
           schema:
-            type: object
+            $ref: '#/definitions/middleware.Response'
         "500":
           description: Internal Server Error
           schema:
-            type: object
+            $ref: '#/definitions/middleware.Response'
       summary: Register a new user
       tags:
       - users

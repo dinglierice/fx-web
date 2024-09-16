@@ -47,16 +47,28 @@ const docTemplate = `{
                     "200": {
                         "description": "配置列表",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.PsConfig"
-                            }
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.CommonResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/domain.PsConfig"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求错误",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/middleware.Response"
                         }
                     }
                 }
@@ -85,15 +97,27 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "用户信息",
+                        "description": "success",
                         "schema": {
-                            "$ref": "#/definitions/domain.User"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.CommonResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/domain.User"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
-                        "description": "请求错误",
+                        "description": "error",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/middleware.Response"
                         }
                     }
                 }
@@ -125,21 +149,33 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "success",
                         "schema": {
-                            "type": "string"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.CommonResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/middleware.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/middleware.Response"
                         }
                     }
                 }
@@ -239,6 +275,41 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "middleware.CommonResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "errCode": {
+                    "type": "string"
+                },
+                "errMessage": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "middleware.Response": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "string"
+                },
+                "errMessage": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "type": {
                     "type": "string"
                 }
             }

@@ -25,15 +25,14 @@ func NewErrorResponse(errCode, errMessage string) *Response {
 	}
 }
 
-// SingleResponse 是一个包含单个数据项的响应结构体
-type SingleResponse struct {
+type CommonResponse struct {
 	Response
 	Data any `json:"data,omitempty"`
 }
 
 // NewCommonResponse 构建一个包含单个数据项的成功响应
-func NewCommonResponse(data any) *SingleResponse {
-	return &SingleResponse{
+func NewCommonResponse(data any) *CommonResponse {
+	return &CommonResponse{
 		Response: Response{
 			Success: true,
 			Type:    "CommonResponse",

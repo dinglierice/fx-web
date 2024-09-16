@@ -33,9 +33,9 @@ func NewUserHandler(service domain.UserService, logger *zap.Logger) *UserHandler
 // @Accept json
 // @Produce json
 // @Param userDto body domain.UserDTO true "User DTO"
-// @Success 200 {object} string
-// @Failure 400 {object} any
-// @Failure 500 {object} any
+// @Success 200 {object} middleware.CommonResponse{data=string} "success"
+// @Failure 400 {object} middleware.Response
+// @Failure 500 {object} middleware.Response
 // @Router /users/register [post]
 func (u *UserHandler) UserRegister(c *gin.Context) {
 	userDto := &domain.UserDTO{}
@@ -91,8 +91,8 @@ func (u *UserHandler) UserLogin(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint64 true "用户ID"
-// @Success 200 {object} domain.User "用户信息"
-// @Failure 400 {object} any "请求错误"
+// @Success 200 {object} middleware.CommonResponse{data=domain.User} "success"
+// @Failure 400 {object} middleware.Response "error"
 // @Router /user/queryTest/{id} [get]
 func (u *UserHandler) UserQueryTest(c *gin.Context) {
 	idString := c.Param("id")
