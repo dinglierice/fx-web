@@ -21,7 +21,7 @@ func NewUserHandler(service domain.UserService, logger *zap.Logger) *UserHandler
 	}
 }
 
-// TODO SWAGGO文档中返回值到底应该怎么表示
+// TODO ASE加密算法这里可以再学习下
 // TODO 用户注册这部分,起初为了维护service涉及实体的干净, 把过多的逻辑放在了handler中, 待探索和修改, 目前阶段暂时按照service兼职实体转换的方式去做
 
 // @BasePath /api/v1
@@ -29,7 +29,7 @@ func NewUserHandler(service domain.UserService, logger *zap.Logger) *UserHandler
 // UserRegister godoc
 // @Summary Register a new user
 // @Description Register a new user with the provided details
-// @Tags users
+// @Tags 用户
 // @Accept json
 // @Produce json
 // @Param userDto body domain.UserDTO true "User DTO"
@@ -81,14 +81,35 @@ func (u *UserHandler) UserRegister(c *gin.Context) {
 	c.Set("data", "注册成功")
 }
 
+// @BasePath /api/v1
+
+// UserLogin godoc
+// @Summary 用户登录
+// @Description 用户登录并获取JWT token
+// @Tags 用户
+// @Accept  json
+// @Produce  json
+// @Param   user  body      domain.UserDTO  true  "用户信息"
+// @Success 200   {object}  middleware.CommonResponse{data=string}  "{"token": "jwt_token"}"
+// @Failure 400   {object}  middleware.Response  "{"errCode": 400, "errMessage": "错误信息"}"
+// @Router /user/login [post]
 func (u *UserHandler) UserLogin(c *gin.Context) {
-	user := &domain.User{}
+	user := &domain.UserDTO{}
 	if err := c.ShouldBind(user); err == nil {
-		res := u.service.Login(c.Request.Context(), user)
-		c.JSON(200, res)
+		token, loginErr := u.service.Login(c.Request.Context(), user)
+		if nil != loginErr {
+			c.Status(http.StatusBadRequest)
+			c.Set("errCode", 400)
+			c.Set("errMessage", loginErr.Error())
+		} else {
+			c.Status(http.StatusOK)
+			c.Set("data", token)
+		}
 	} else {
 		u.logger.Info("UserLogin", zap.Error(err))
-		c.JSON(400, nil)
+		c.Status(http.StatusBadRequest)
+		c.Set("errCode", 400)
+		c.Set("errMessage", err.Error())
 	}
 }
 
@@ -96,7 +117,7 @@ func (u *UserHandler) UserLogin(c *gin.Context) {
 
 // UserQueryTest @Summary 用于测试获取用户信息
 // @Description 获取用户信息接口
-// @Tags user
+// @Tags 用户
 // @Accept json
 // @Produce json
 // @Param id path uint64 true "用户ID"

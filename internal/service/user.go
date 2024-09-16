@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fx-web/internal/domain"
 	"fx-web/internal/ent"
+	"fx-web/internal/utils"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -81,9 +82,29 @@ func (s *userService) DeleteUser(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s *userService) Login(ctx context.Context, user *domain.User) error {
-	// TODO 看似无需新增repo接口, 复现下参数校验逻辑即可
-	return nil
+func (s *userService) Login(ctx context.Context, user *domain.UserDTO) (string, error) {
+	queryUserResult, err := s.repo.GetByName(ctx, user.UserName)
+	if err != nil {
+		s.logger.Error("GetUser repo execute error", zap.Error(err))
+		return "", err
+	}
+	if queryUserResult == nil {
+		s.logger.Error("User not found", zap.Error(err))
+		return "", err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(queryUserResult.PasswordDigest), []byte(user.Password))
+	if err != nil {
+		s.logger.Error("Password not match", zap.Error(err))
+		return "", err
+	}
+
+	token, err := utils.GenerateToken(queryUserResult.ID, queryUserResult.UserName, 0)
+	if err != nil {
+		s.logger.Error("GenerateToken error", zap.Error(err))
+		return "", err
+	}
+	return token, nil
 }
 
 func genPassword(password string) (string, error) {

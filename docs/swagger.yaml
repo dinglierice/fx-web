@@ -124,6 +124,37 @@ paths:
             $ref: '#/definitions/middleware.Response'
       tags:
       - config
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户登录并获取JWT token
+      parameters:
+      - description: 用户信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"token": "jwt_token"}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.CommonResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: '{"errCode": 400, "errMessage": "错误信息"}'
+          schema:
+            $ref: '#/definitions/middleware.Response'
+      summary: 用户登录
+      tags:
+      - 用户
   /user/queryTest/{id}:
     get:
       consumes:
@@ -152,7 +183,7 @@ paths:
           schema:
             $ref: '#/definitions/middleware.Response'
       tags:
-      - user
+      - 用户
   /user/register:
     post:
       consumes:
@@ -187,5 +218,5 @@ paths:
             $ref: '#/definitions/middleware.Response'
       summary: Register a new user
       tags:
-      - users
+      - 用户
 swagger: "2.0"
