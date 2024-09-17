@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fx-web/internal/domain"
 	"fx-web/internal/ent"
+	"sync"
 )
 
 // psConfigService is a concrete implementation of PsConfigService.
@@ -54,15 +55,32 @@ func (s *psConfigService) DeleteConfig(ctx context.Context, id uint64) error {
 }
 
 // ListConfigs lists all configs.
-// TODO 什么时候开启协成
+// TODO 学习go并发的核心概念和使用
 func (s *psConfigService) ListConfigs(ctx context.Context, limit, offset int) ([]*domain.PsConfig, error) {
-	entConfigs, err := s.repo.List(ctx, limit, offset)
-	if err != nil {
-		return nil, err
-	}
+	var wg sync.WaitGroup
+	var mu sync.Mutex
 	var domainConfigs []*domain.PsConfig
-	for _, entConfig := range entConfigs {
-		domainConfigs = append(domainConfigs, convertEntToDomain(entConfig))
+	errChan := make(chan error, 1)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		entConfigs, err := s.repo.List(ctx, limit, offset)
+		if err != nil {
+			errChan <- err
+			return
+		}
+		mu.Lock()
+		defer mu.Unlock()
+		for _, entConfig := range entConfigs {
+			domainConfigs = append(domainConfigs, convertEntToDomain(entConfig))
+		}
+	}()
+	go func() {
+		wg.Wait()
+		close(errChan)
+	}()
+	if err := <-errChan; err != nil {
+		return nil, err
 	}
 	return domainConfigs, nil
 }
