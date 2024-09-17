@@ -61,6 +61,8 @@ func (s *psConfigService) ListConfigs(ctx context.Context, limit, offset int) ([
 	var mu sync.Mutex
 	var domainConfigs []*domain.PsConfig
 	errChan := make(chan error, 1)
+	doneChan := make(chan struct{})
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -75,12 +77,20 @@ func (s *psConfigService) ListConfigs(ctx context.Context, limit, offset int) ([
 			domainConfigs = append(domainConfigs, convertEntToDomain(entConfig))
 		}
 	}()
+
 	go func() {
 		wg.Wait()
+		close(doneChan)
 		close(errChan)
 	}()
-	if err := <-errChan; err != nil {
-		return nil, err
+
+	select {
+	case err := <-errChan:
+		if err != nil {
+			return nil, err
+		}
+	case <-doneChan:
+		// All goroutines have completed
 	}
 	return domainConfigs, nil
 }
