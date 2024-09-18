@@ -55,14 +55,11 @@ func (s *psConfigService) DeleteConfig(ctx context.Context, id uint64) error {
 }
 
 // ListConfigs lists all configs.
-// TODO 学习go并发的核心概念和使用
 func (s *psConfigService) ListConfigs(ctx context.Context, limit, offset int) ([]*domain.PsConfig, error) {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	var domainConfigs []*domain.PsConfig
 	errChan := make(chan error, 1)
-	doneChan := make(chan struct{})
-
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -77,20 +74,12 @@ func (s *psConfigService) ListConfigs(ctx context.Context, limit, offset int) ([
 			domainConfigs = append(domainConfigs, convertEntToDomain(entConfig))
 		}
 	}()
-
 	go func() {
 		wg.Wait()
-		close(doneChan)
 		close(errChan)
 	}()
-
-	select {
-	case err := <-errChan:
-		if err != nil {
-			return nil, err
-		}
-	case <-doneChan:
-		// All goroutines have completed
+	if err := <-errChan; err != nil {
+		return nil, err
 	}
 	return domainConfigs, nil
 }
