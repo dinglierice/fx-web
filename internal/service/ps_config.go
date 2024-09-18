@@ -60,12 +60,17 @@ func (s *psConfigService) ListConfigs(ctx context.Context, limit, offset int) ([
 	var mu sync.Mutex
 	var domainConfigs []*domain.PsConfig
 	errChan := make(chan error, 1)
+	doneChan := make(chan struct{})
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		entConfigs, err := s.repo.List(ctx, limit, offset)
 		if err != nil {
-			errChan <- err
+			select {
+			case errChan <- err:
+			default:
+			}
 			return
 		}
 		mu.Lock()
@@ -74,14 +79,22 @@ func (s *psConfigService) ListConfigs(ctx context.Context, limit, offset int) ([
 			domainConfigs = append(domainConfigs, convertEntToDomain(entConfig))
 		}
 	}()
+
 	go func() {
 		wg.Wait()
-		close(errChan)
+		close(doneChan)
 	}()
-	if err := <-errChan; err != nil {
+
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case err := <-errChan:
 		return nil, err
+	case <-doneChan:
+		mu.Lock()
+		defer mu.Unlock()
+		return domainConfigs, nil
 	}
-	return domainConfigs, nil
 }
 
 // convertEntToDomain converts an ent.PsConfig to a domain.PsConfig.
