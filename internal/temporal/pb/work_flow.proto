@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package workflow;
+
+option go_package = "fx-web/internal/temporal/pb/workflow";
+
+service WorkflowService {
+  rpc StartWorkflow(StartWorkflowRequest) returns (StartWorkflowResponse) {}
+  rpc GetWorkflowStatus(GetWorkflowStatusRequest) returns (GetWorkflowStatusResponse) {}
+}
+
+message StartWorkflowRequest {
+  string workflow_type = 1;
+  bytes input = 2;
+}
+
+message StartWorkflowResponse {
+  string workflow_id = 1;
+}
+
+message GetWorkflowStatusRequest {
+  string workflow_id = 1;
+}
+
+message GetWorkflowStatusResponse {
+  string status = 1;
+}

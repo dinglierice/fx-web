@@ -1,5 +1,10 @@
 package middleware
 
+import (
+	"fx-web/internal/consts"
+	"strconv"
+)
+
 type Response struct {
 	Success    bool   `json:"success"`
 	ErrCode    string `json:"errCode,omitempty"`
@@ -36,6 +41,35 @@ func NewCommonResponse(data any) *CommonResponse {
 		Response: Response{
 			Success: true,
 			Type:    "CommonResponse",
+		},
+		Data: data,
+	}
+}
+
+type CommonErrorResponse struct {
+	Response
+	Data any `json:"data,omitempty"`
+}
+
+func NewCommonErrorResponse(error consts.CommonError) *CommonErrorResponse {
+	return &CommonErrorResponse{
+		Response: Response{
+			Success:    false,
+			ErrCode:    strconv.Itoa(error.Code),
+			ErrMessage: error.Msg,
+			Type:       "ErrorResponse",
+		},
+		Data: error.Data,
+	}
+}
+
+func NewCommonErrorResponseWithData(error consts.CommonError, data any) *CommonErrorResponse {
+	return &CommonErrorResponse{
+		Response: Response{
+			Success:    false,
+			ErrCode:    strconv.Itoa(error.Code),
+			ErrMessage: error.Msg,
+			Type:       "ErrorResponse",
 		},
 		Data: data,
 	}
